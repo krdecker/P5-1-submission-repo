@@ -54,7 +54,7 @@ var EatsModel = {
 
 var model = EatsModel;
 
-///////////////MAP API VIEWMODEL///////////////////////////
+///////////////MAP VIEWMODEL///////////////////////////
 
 var map, markers;
 var infowindow;
@@ -125,9 +125,6 @@ var mapOptions = {
     }
 
 
-
-
-
 function NoMap() {
     alert("Google Map is unavailable just now.\n"
         + "(you may want to check your internet connection) \n");
@@ -194,7 +191,7 @@ function attachBouncer(marker) {
 
     function doBounce() {
         google.maps.event.removeListener(clickEvent);
-        cleanUp();
+        cleanUpScreen();
         marker.setAnimation(google.maps.Animation.BOUNCE);
         //console.log("in doBounce: have set the BOUNCE");
 
@@ -210,7 +207,7 @@ function attachBouncer(marker) {
     }
 }
 
-function cleanUp() {
+function cleanUpScreen() {
     infowindow.close();
     vm.slideOff();
 }
@@ -218,7 +215,10 @@ function cleanUp() {
 function openWindow(marker) {
     var content;
 
-    if (infowindow) infowindow.close();
+    //if (infowindow) infowindow.close();
+    cleanUpScreen();
+    vm.listCollapse();
+
     content = buildContent(marker);
 
     if (content) infowindow.setContent(content);
@@ -236,7 +236,7 @@ function buildContent(marker) {
     var css = '"height:100%;width:100%"';
     var content = '<div onclick="itchwindow()" style='
             + css + '>' + picture + '<br><span style="color:darkgreen">' + marker.title + '</span>'
-            + '<br><span style="color:red">-MORE INFO-</span></div>';
+            + '<br><span style="color:red">-CLICK FOR MORE INFO-</span></div>';
 
     return content;
 }
@@ -276,11 +276,15 @@ var ViewModel = function () {
     var self = this;
 
     // Data
-    self.slideOn = ko.observable(false);
-    self.slideContent = ko.observable("");
+    self.listOn = ko.observable(true);
+    self.burgerMenu = ko.observable(false);
     self.spotList = ko.observableArray(model.spots);
 
+    self.slideOn = ko.observable(false);
+    self.slideContent = ko.observable("");
+
     self.filterSlot = ko.observable();
+    self.isSelected = ko.observable(false);
 
 
     // Behaviours
@@ -294,18 +298,19 @@ var ViewModel = function () {
         }
     };
 
-    self.isSelected = ko.observable(false);
-
     self.setFilterSelected = function() {
         this.isSelected(true);
         //self.slideOff();
-        cleanUp();
+        cleanUpScreen();
+        self.listExpand();
     };
 
     self.filterSlot.subscribe(function(data) {
         console.log(data);
-        if (infowindow) infowindow.close();
-        self.slideOff();
+        // if (infowindow) infowindow.close();
+        // self.slideOff();
+        // cleanUpScreen();
+        self.listExpand();
 
         self.spotList(filterList(data, model.spots));
         reSetMarkers(self.spotList(), map, markers);
@@ -314,12 +319,10 @@ var ViewModel = function () {
     self.onEnter = function (data, event) {
 
         if (event.keyCode === 13) {
-            //console.log("Got an <enter> !!!");
             if (infowindow.anchor != null) {
                   self.openAPIslide(infowindow.anchor.title);
             }
             else {
-                //if (infowindow) google.maps.event.trigger(infowindow, 'click');
                 if (self.spotList().length === 1) {
                     for (var i in markers) {
                         var marker = markers[i];
@@ -334,10 +337,21 @@ var ViewModel = function () {
             console.log("in else: ")
             if (infowindow) infowindow.close(); //for any other keypress
             self.slideOff();
+            self.listExpand();
         }
         return true; // necessary to reflect the text in the slot
     }
 
+    self.listCollapse = function () {
+        self.listOn(false);
+        self.burgerMenu(true);
+    }
+
+    self.listExpand = function () {
+        cleanUpScreen();
+        self.burgerMenu(false);
+        self.listOn(true);
+    }
 
 //interface to API AJAX system
 
@@ -347,14 +361,11 @@ var ViewModel = function () {
         var ajax_error = buildSlideContent(spotName);
 
         if (ajax_error) self.slideContent(ajax_error);
-
-        self.slideOn(true);
+        self.slideOn(true); //  will either display foursquare info or error message
     }
 
     self.slideOff = function () {
-
         this.slideOn(false);
-        //console.log("Value of SlideOn is: " + this.slideOn() )
     }
 
 };

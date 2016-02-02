@@ -12,7 +12,10 @@
     <div id="api-slide" data-bind="visible: slideOn, click: slideOff">
         <span data-bind="html: slideContent"></span>
     </div>
-    <div id="listing" class="over-lay">
+    <div id="burger" class="over-lay" data-bind="visible: burgerMenu, click: listExpand">
+        <img id="burgerpic" src="img/burger.png">
+    </div>
+    <div id="listing" class="over-lay" data-bind="visible: listOn">
         <ul id="spot-list" data-bind="foreach: spotList">
             <li class="spot" data-bind="text: name,
                                         click: $parent.spotPick"></li>
