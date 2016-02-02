@@ -145,6 +145,7 @@ function initMap() {
 
     setMarkers(model.spots, map);
 
+    // stay centred
     google.maps.event.addDomListener(window, 'resize', function() {
         map.setCenter(model.center);
     });
@@ -195,16 +196,16 @@ function attachBouncer(marker) {
         google.maps.event.removeListener(clickEvent);
         cleanUp();
         marker.setAnimation(google.maps.Animation.BOUNCE);
-        console.log("in doBounce: have set the BOUNCE");
+        //console.log("in doBounce: have set the BOUNCE");
 
         window.setTimeout( function() {
             clickEvent = google.maps.event.addListener(marker, "click", doBounce);
             marker.setAnimation(null);
-            console.log("in doBounce: have set the NULL");
+            //console.log("in doBounce: have set the NULL");
 
         }, 3000);
 
-        console.log("in doBounce: about to call to open window");
+        //console.log("in doBounce: about to call to open window");
         openWindow(marker);
     }
 }
@@ -223,14 +224,14 @@ function openWindow(marker) {
     if (content) infowindow.setContent(content);
 
     infowindow.open(marker.get('map'), marker);
-    console.log("In openWindow: just opened window");
+    //console.log("In openWindow: just opened window");
 }
 
 function buildContent(marker) {
 
     var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=200x150&location=' + marker.position.toString() + '';
     var picture = '<img class="bgimg" src="' + streetviewUrl + '">';
-    console.log("In buildContent: " + marker.position.toString());
+    //console.log("In buildContent: " + marker.position.toString());
     //var css = '"height:100%;width:100%;font-size:4em;color:blue;background-color:orange;padding:5px"';
     var css = '"height:100%;width:100%"';
     var content = '<div onclick="itchwindow()" style='
@@ -241,8 +242,8 @@ function buildContent(marker) {
 }
 
 function itchwindow() {
-    console.log("Ouch!!!");
-    console.log(infowindow.anchor.title);
+    //console.log("Ouch!!!");
+    //console.log(infowindow.anchor.title);
     vm.openAPIslide(infowindow.anchor.title);
 }
 
@@ -313,7 +314,7 @@ var ViewModel = function () {
     self.onEnter = function (data, event) {
 
         if (event.keyCode === 13) {
-            console.log("Got an <enter> !!!");
+            //console.log("Got an <enter> !!!");
             if (infowindow.anchor != null) {
                   self.openAPIslide(infowindow.anchor.title);
             }
@@ -341,13 +342,9 @@ var ViewModel = function () {
 //interface to API AJAX system
 
     self.openAPIslide = function (spotName) {
-        console.log("In openAPIslide with: " + spotName);
+        //console.log("In openAPIslide with: " + spotName);
 
-        //var slideString =
         var ajax_error = buildSlideContent(spotName);
-        //console.log(slideString);
-
-        //self.slideContent(slideString);
 
         if (ajax_error) self.slideContent(ajax_error);
 
@@ -357,7 +354,7 @@ var ViewModel = function () {
     self.slideOff = function () {
 
         this.slideOn(false);
-        console.log("Value of SlideOn is: " + this.slideOn() )
+        //console.log("Value of SlideOn is: " + this.slideOn() )
     }
 
 };
@@ -407,7 +404,7 @@ function buildSlideContent(spotName) {
     var formattedData = "";
     var loc = getLocationAsLLString(spotName, EatsModel);
     var ajax_error;
-    console.log(loc);
+    //console.log(loc);
 
     // get the foursquare ID number of the spot
     $.ajax({
@@ -433,7 +430,7 @@ function buildSlideContent(spotName) {
             url: fourSquareURL + '/v2/venues/' + venue.id,
             dataType: 'json',
             data: 'limit=1' +
-                    '&' + loc + //'ll=45.5590561,-122.6447018' +
+                    '&' + loc +
                     '&query=' + spotName +
                     '&client_id='+ kr.foursquare.Client_id +
                     '&client_secret='+ kr.foursquare.Client_secret +
@@ -448,10 +445,10 @@ function buildSlideContent(spotName) {
     }
 
     function makeNiceData(data){
-        console.log(data);
+        //console.log(data);
         var venue = data.response.venue;
 
-        console.log(venue.name);
+        //console.log(venue.name);
             formattedData = 'FourSquare info: '
                                 + '<br>' + '<br>' + venue.name + '<br>'
                                 + venue.contact.formattedPhone + '<br>'
@@ -479,6 +476,26 @@ function buildSlideContent(spotName) {
 
 
 //===================THE END===================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
