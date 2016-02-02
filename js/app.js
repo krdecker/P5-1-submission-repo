@@ -20,11 +20,6 @@ var EatsModel = {
             name: "Uncle Fatih's Pizza",
             location: {lat: 49.262487, lng: -123.070000} //was .262517 .070177
         },
-        // foursquare search choked on this; returned YVR instead, hahahaha
-        // {
-        //     name: "A&W Restaurant",
-        //     location: {lat: 49.262535, lng: -123.069399}
-        // },
         {
             name: "Buddha's Orient Express",
             location: {lat: 49.262719, lng: -123.069289}
@@ -112,13 +107,10 @@ var mapOptions = {
         center: {lat: 49.262387, lng: -123.069768},//49.262387, -123.069768
         // Commercial Broadway Station 49°15′45″N, 123°04′08″W
         scrollwheel: false,
-        //zoom: 19, // tighter for transit
-        zoom: 16, // for eats etc
-        //maxZoom: 19,
-        //minZoom: 19,
-        zoomControl: true, //false,
+        zoom: 16,
+        zoomControl: true,
         scrollwheel: false,
-        draggable: true, //false,
+        draggable: true,
         disableDoubleClickZoom: true,
         disableDefaultUI: true,
         styles: RedRoadsNGreenBusStops
@@ -209,6 +201,7 @@ function attachBouncer(marker) {
 
 function cleanUpScreen() {
     infowindow.close();
+    map.setCenter(model.center);
     vm.slideOff();
 }
 
