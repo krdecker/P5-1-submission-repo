@@ -116,9 +116,9 @@ var mapOptions = {
         zoom: 16, // for eats etc
         //maxZoom: 19,
         //minZoom: 19,
-        zoomControl: false,
+        zoomControl: true, //false,
         scrollwheel: false,
-        draggable: false,
+        draggable: true, //false,
         disableDoubleClickZoom: true,
         disableDefaultUI: true,
         styles: RedRoadsNGreenBusStops
