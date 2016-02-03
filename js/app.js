@@ -185,22 +185,20 @@ function attachBouncer(marker) {
         google.maps.event.removeListener(clickEvent);
         cleanUpScreen();
         marker.setAnimation(google.maps.Animation.BOUNCE);
-        //console.log("in doBounce: have set the BOUNCE");
 
         window.setTimeout( function() {
             clickEvent = google.maps.event.addListener(marker, "click", doBounce);
             marker.setAnimation(null);
-            //console.log("in doBounce: have set the NULL");
 
         }, 3000);
 
-        //console.log("in doBounce: about to call to open window");
         openWindow(marker);
     }
 }
 
 function cleanUpScreen() {
     infowindow.close();
+    map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
     vm.slideOff();
 }
@@ -208,7 +206,6 @@ function cleanUpScreen() {
 function openWindow(marker) {
     var content;
 
-    //if (infowindow) infowindow.close();
     cleanUpScreen();
     vm.listCollapse();
 
@@ -217,7 +214,6 @@ function openWindow(marker) {
     if (content) infowindow.setContent(content);
 
     infowindow.open(marker.get('map'), marker);
-    //console.log("In openWindow: just opened window");
 }
 
 function buildContent(marker) {
@@ -235,22 +231,18 @@ function buildContent(marker) {
 }
 
 function itchwindow() {
-    //console.log("Ouch!!!");
-    //console.log(infowindow.anchor.title);
     vm.openAPIslide(infowindow.anchor.title);
 }
 
 
 // interface to filtration system
 function reSetMarkers(spots, map, markers) {
-    //console.log("got spots, starting with:" + spots[0].name)
     var names = [];
 
     for (var i in spots) names.push(spots[i].name);
 
     for (var j in markers) {
         marker = markers[j];
-        //console.log("Checking: " + marker.title);
         if (names.indexOf(marker.title) > -1) marker.setMap(map);
         else marker.setMap(null);
     }
@@ -293,16 +285,12 @@ var ViewModel = function () {
 
     self.setFilterSelected = function() {
         this.isSelected(true);
-        //self.slideOff();
         cleanUpScreen();
         self.listExpand();
     };
 
     self.filterSlot.subscribe(function(data) {
-        console.log(data);
-        // if (infowindow) infowindow.close();
-        // self.slideOff();
-        // cleanUpScreen();
+
         self.listExpand();
 
         self.spotList(filterList(data, model.spots));
@@ -327,7 +315,7 @@ var ViewModel = function () {
         }
 
         else {
-            console.log("in else: ")
+            //console.log("in else: ")
             if (infowindow) infowindow.close(); //for any other keypress
             self.slideOff();
             self.listExpand();
@@ -349,7 +337,6 @@ var ViewModel = function () {
 //interface to API AJAX system
 
     self.openAPIslide = function (spotName) {
-        //console.log("In openAPIslide with: " + spotName);
 
         var ajax_error = buildSlideContent(spotName);
 
@@ -376,9 +363,9 @@ function filterList(userText, modelArray) {
          re = new RegExp(userText, ['i']);
 
      modelArray.forEach( function(element, index, array) {
-        //console.log(element.name);
         if (re.test(element.name)) result.push(element);
      });
+
      return result;
 }
 
