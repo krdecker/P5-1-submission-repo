@@ -106,7 +106,6 @@ var RedRoadsNGreenBusStops = [
 var mapOptions = {
         center: {lat: 49.262387, lng: -123.069768},//49.262387, -123.069768
         // Commercial Broadway Station 49°15′45″N, 123°04′08″W
-        scrollwheel: false,
         zoom: 16,
         zoomControl: true,
         scrollwheel: false,
@@ -114,12 +113,12 @@ var mapOptions = {
         disableDoubleClickZoom: true,
         disableDefaultUI: true,
         styles: RedRoadsNGreenBusStops
-    }
+    };
 
 
 function NoMap() {
-    alert("Google Map is unavailable just now.\n"
-        + "(you may want to check your internet connection) \n");
+    alert("Google Map is unavailable just now.\n" +
+        "(you may want to check your internet connection) \n");
 }
 
 
@@ -218,14 +217,16 @@ function openWindow(marker) {
 
 function buildContent(marker) {
 
-    var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=200x150&location=' + marker.position.toString() + '';
+    var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=200x150&location=' +
+                            marker.position.toString() + '';
     var picture = '<img class="bgimg" src="' + streetviewUrl + '">';
     //console.log("In buildContent: " + marker.position.toString());
     //var css = '"height:100%;width:100%;font-size:4em;color:blue;background-color:orange;padding:5px"';
     var css = '"height:100%;width:100%"';
-    var content = '<div onclick="itchwindow()" style='
-            + css + '>' + picture + '<br><span style="color:darkgreen">' + marker.title + '</span>'
-            + '<br><span style="color:red">-CLICK FOR MORE INFO-</span></div>';
+    var content = '<div onclick="itchwindow()" style=' +
+                    css + '>' + picture + '<br><span style="color:darkgreen">' +
+                    marker.title + '</span>' +
+                    '<br><span style="color:red">-CLICK FOR MORE INFO-</span></div>';
 
     return content;
 }
@@ -235,7 +236,7 @@ function itchwindow() {
 }
 
 
-// interface to filtration system
+// interface map/markers viewmodel to ko text filtration system
 function reSetMarkers(spots, map, markers) {
     var names = [];
 
@@ -300,7 +301,7 @@ var ViewModel = function () {
     self.onEnter = function (data, event) {
 
         if (event.keyCode === 13) {
-            if (infowindow.anchor != null) {
+            if (infowindow.anchor) {
                   self.openAPIslide(infowindow.anchor.title);
             }
             else {
@@ -315,38 +316,43 @@ var ViewModel = function () {
         }
 
         else {
-            //console.log("in else: ")
             if (infowindow) infowindow.close(); //for any other keypress
             self.slideOff();
             self.listExpand();
         }
         return true; // necessary to reflect the text in the slot
-    }
+    };
 
     self.listCollapse = function () {
         self.listOn(false);
         self.burgerMenu(true);
-    }
+    };
 
     self.listExpand = function () {
         cleanUpScreen();
         self.burgerMenu(false);
         self.listOn(true);
-    }
+    };
 
 //interface to API AJAX system
 
     self.openAPIslide = function (spotName) {
 
-        var ajax_error = buildSlideContent(spotName);
+        // builds content and sets it in slide
+        //var ajax_data =
+        buildSlideContent(spotName);
+        //console.log("In openAPI: ");//, ajax_data);
+        //self.slideContent(buildSlideContent(spotName));
+    //     if self.slideContent(ajax_data);
 
-        if (ajax_error) self.slideContent(ajax_error);
-        self.slideOn(true); //  will either display foursquare info or error message
-    }
+    //     window.setTimeout(function () {
+    //         self.slideOn(true); //  will either display foursquare info or error message
+    //     }, 0);
+    };
 
     self.slideOff = function () {
         this.slideOn(false);
-    }
+    };
 
 };
 
@@ -373,7 +379,7 @@ function filterList(userText, modelArray) {
 function getLocationAsLLString(spotName, model) {
     var result = "ll=";
 
-    for (i in model.spots) {
+    for (var i in model.spots) {
         var spot = model.spots[i];
         if (spot.name == spotName) {
             result += spot.location.lat.toString() + ',' + spot.location.lng.toString();
@@ -430,39 +436,42 @@ function buildSlideContent(spotName) {
             //success: ,
             error: sendError
     }).success(function(response){
-          makeNiceData(response);
+          formatShowData(response);
         });
 
     }
 
-    function makeNiceData(data){
+    function formatShowData(data){
         //console.log(data);
         var venue = data.response.venue;
 
         //console.log(venue.name);
-            formattedData = 'FourSquare info: '
-                                + '<br>' + '<br>' + venue.name + '<br>'
-                                + venue.contact.formattedPhone + '<br>'
-            + '- ' + venue.location.address + '<br>'
-            + '- ' + venue.location.city  + '<br>'
-            + '- ' + venue.location.country  + '<br>'
-            + 'x-street: ' + venue.location.crossStreet + '<br>'
-            + 'Check-ins: ' + venue.stats.checkinsCount.toString() + '<br>'
-            + venue.likes.summary + '<br>' + '<br>'
-            + '<span style="background-color:#' + venue.ratingColor + ';color:black;padding:1%">'
-            + 'Rating: ' + venue.rating.toString() + '</span>' + '<br>'
-
-             ;
+            formattedData = 'FourSquare info: ' +
+                                '<br>' + '<br>' + venue.name + '<br>' +
+                                venue.contact.formattedPhone + '<br>' +
+                                '- ' + venue.location.address + '<br>' +
+                                '- ' + venue.location.city  + '<br>' +
+                                '- ' + venue.location.country  + '<br>' +
+                                'x-street: ' + venue.location.crossStreet + '<br>' +
+                                'Check-ins: ' + venue.stats.checkinsCount.toString() +
+                                '<br>' + venue.likes.summary + '<br>' + '<br>' +
+                                '<span style="background-color:#' + venue.ratingColor +
+                                ';color:black;padding:1%">' +
+                                'Rating: ' + venue.rating.toString() +
+                                '</span>' + '<br>' +
+                                '<img src="' + venue.bestPhoto.prefix +
+                                'cap300' + venue.bestPhoto.suffix + '">'
+                                ;
 
         vm.slideContent(formattedData);
+        vm.slideOn(true);
     }
 
     function sendError(object, error, exception) {
         ajax_error = "Web call failed: " + error ;
+        vm.slideContent(ajax_error);
+        vm.slideOn(true);
     }
-
-    return ajax_error;
-
 }
 
 
@@ -532,5 +541,5 @@ var kr = {
         Token:   "-_F8aOxonR6q5SqvURwwgLIdU-qteS-B",
         Token_Secret:    "GF7uRcPWCpzlHcRP3DiJWjvcXJE"
     }
-}
+};
 
