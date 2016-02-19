@@ -49,6 +49,109 @@ var EatsModel = {
 
 var model = EatsModel;
 
+
+function buildWindowContent(marker) {
+
+    var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=200x150&location=' +
+                            marker.position.toString() + '';
+    var picture = '<img class="bgimg" src="' + streetviewUrl + '">';
+    //console.log("In buildContent: " + marker.position.toString());
+    //var css = '"height:100%;width:100%;font-size:4em;color:blue;background-color:orange;padding:5px"';
+    var css = '"height:100%;width:100%"';
+    var content = '<div onclick="itchwindow()" style=' +
+                    css + '>' + picture + '<br><span style="color:darkgreen">' +
+                    marker.title + '</span>' +
+                    '<br><span style="color:red">-CLICK FOR MORE INFO-</span></div>';
+
+    return content;
+}
+
+//==========================================================
+// 3rd party API stuff
+
+
+var fourSquareURL = 'https://api.foursquare.com';
+
+
+function buildSlideContent(spotName) {
+    var formattedData = "";
+    var loc = getLocationAsLLString(spotName, EatsModel);
+    var ajax_error;
+    //console.log(loc);
+
+    // get the foursquare ID number of the spot
+    $.ajax({
+            url: fourSquareURL + '/v2/venues/search',
+            dataType: 'json',
+            data: 'limit=1' +
+                    '&' + loc + '&query=' + spotName +
+                    '&client_id='+ kr.foursquare.Client_id +
+                    '&client_secret='+ kr.foursquare.Client_secret +
+                    '&v=20160130',
+            async: true,
+            //success: ,
+            error: sendError
+    }).success(function(response){
+          getVenueInfo(response);
+        });
+
+
+    function getVenueInfo(data) {
+        var venue = data.response.venues[0];
+        //https://api.foursquare.com/v2/venues/VENUE_ID
+        $.ajax({ // to get the detailed foursquare of the 'complete venue' based on ID
+            url: fourSquareURL + '/v2/venues/' + venue.id,
+            dataType: 'json',
+            data: 'limit=1' +
+                    '&' + loc +
+                    '&query=' + spotName +
+                    '&client_id='+ kr.foursquare.Client_id +
+                    '&client_secret='+ kr.foursquare.Client_secret +
+                    '&v=20160130',
+            async: true,
+            //success: ,
+            error: sendError
+    }).success(function(response){
+          formatShowData(response);
+        });
+
+    }
+
+    function formatShowData(data){
+        //console.log(data);
+        var venue = data.response.venue;
+
+        //console.log(venue.name);
+            formattedData = 'FourSquare info: ' +
+                                '<br>' + '<br>' + venue.name + '<br>' +
+                                venue.contact.formattedPhone + '<br>' +
+                                '- ' + venue.location.address + '<br>' +
+                                '- ' + venue.location.city  + '<br>' +
+                                '- ' + venue.location.country  + '<br>' +
+                                'x-street: ' + venue.location.crossStreet + '<br>' +
+                                'Check-ins: ' + venue.stats.checkinsCount.toString() +
+                                '<br>' + venue.likes.summary + '<br>' + '<br>' +
+                                '<span style="background-color:#' + venue.ratingColor +
+                                ';color:black;padding:1%">' +
+                                'Rating: ' + venue.rating.toString() +
+                                '</span>' + '<br>' +
+                                '<img src="' + venue.bestPhoto.prefix +
+                                'cap300' + venue.bestPhoto.suffix + '">'
+                                ;
+
+        vm.slideContent(formattedData);
+        vm.slideOn(true);
+    }
+
+    function sendError(object, error, exception) {
+        ajax_error = "Web call failed: " + error ;
+        vm.slideContent(ajax_error);
+        vm.slideOn(true);
+    }
+}
+
+//TODO : build these results into the model and save in Local storage
+
 ///////////////MAP VIEWMODEL///////////////////////////
 
 var map;//, markers;
@@ -144,12 +247,13 @@ function initMap() {
 function buildSpots(spots) {
     for (var i in spots) {
         eatingSpots.push(new Spot(spots[i]));
-        eatingSpots[i].logName();
+        //eatingSpots[i].logName();
     }
 }
 
+// constructor
 var Spot = function(data) {
-  console.log("In Spot constructor for: " + data.name);
+  //console.log("In Spot constructor for: " + data.name);
   var that = this;
   this.name = data.name;
   this.location = data.location;
@@ -159,10 +263,10 @@ var Spot = function(data) {
         map: map,
         opacity: 0.4
   });
-  //this.content = buildContent(this.marker);
-  this.windowContent = true;
 
-  console.log(this.marker.title);
+  this.windowContent = buildWindowContent(this.marker);
+
+  //console.log(this.marker.title);
   this.clickEvent = google.maps.event.addListener(this.marker, "click", function () {
         that.doBounce();
     });
@@ -275,28 +379,11 @@ Spot.prototype.openWindow = function () {
     //cleanUpScreen();
     //vm.listCollapse();
 
-    //content = buildContent(marker);
-
-    //if (this.content) infowindow.setContent(this.content);
-
-    //infowindow.open(map, this.marker);
+    infowindow.setContent(this.windowContent);
+    infowindow.open(map, this.marker);
 }
 
-function buildContent(marker) {
 
-    var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=200x150&location=' +
-                            marker.position.toString() + '';
-    var picture = '<img class="bgimg" src="' + streetviewUrl + '">';
-    //console.log("In buildContent: " + marker.position.toString());
-    //var css = '"height:100%;width:100%;font-size:4em;color:blue;background-color:orange;padding:5px"';
-    var css = '"height:100%;width:100%"';
-    var content = '<div onclick="itchwindow()" style=' +
-                    css + '>' + picture + '<br><span style="color:darkgreen">' +
-                    marker.title + '</span>' +
-                    '<br><span style="color:red">-CLICK FOR MORE INFO-</span></div>';
-
-    return content;
-}
 
 function itchwindow() {
     vm.openAPIslide(infowindow.anchor.title);
@@ -462,89 +549,6 @@ function getLocationAsLLString(spotName, model) {
 }
 
 
-//==========================================================
-// 3rd party API stuff
-
-
-var fourSquareURL = 'https://api.foursquare.com';
-
-
-function buildSlideContent(spotName) {
-    var formattedData = "";
-    var loc = getLocationAsLLString(spotName, EatsModel);
-    var ajax_error;
-    //console.log(loc);
-
-    // get the foursquare ID number of the spot
-    $.ajax({
-            url: fourSquareURL + '/v2/venues/search',
-            dataType: 'json',
-            data: 'limit=1' +
-                    '&' + loc + '&query=' + spotName +
-                    '&client_id='+ kr.foursquare.Client_id +
-                    '&client_secret='+ kr.foursquare.Client_secret +
-                    '&v=20160130',
-            async: true,
-            //success: ,
-            error: sendError
-    }).success(function(response){
-          getVenueInfo(response);
-        });
-
-
-    function getVenueInfo(data) {
-        var venue = data.response.venues[0];
-        //https://api.foursquare.com/v2/venues/VENUE_ID
-        $.ajax({ // to get the detailed foursquare of the 'complete venue' based on ID
-            url: fourSquareURL + '/v2/venues/' + venue.id,
-            dataType: 'json',
-            data: 'limit=1' +
-                    '&' + loc +
-                    '&query=' + spotName +
-                    '&client_id='+ kr.foursquare.Client_id +
-                    '&client_secret='+ kr.foursquare.Client_secret +
-                    '&v=20160130',
-            async: true,
-            //success: ,
-            error: sendError
-    }).success(function(response){
-          formatShowData(response);
-        });
-
-    }
-
-    function formatShowData(data){
-        //console.log(data);
-        var venue = data.response.venue;
-
-        //console.log(venue.name);
-            formattedData = 'FourSquare info: ' +
-                                '<br>' + '<br>' + venue.name + '<br>' +
-                                venue.contact.formattedPhone + '<br>' +
-                                '- ' + venue.location.address + '<br>' +
-                                '- ' + venue.location.city  + '<br>' +
-                                '- ' + venue.location.country  + '<br>' +
-                                'x-street: ' + venue.location.crossStreet + '<br>' +
-                                'Check-ins: ' + venue.stats.checkinsCount.toString() +
-                                '<br>' + venue.likes.summary + '<br>' + '<br>' +
-                                '<span style="background-color:#' + venue.ratingColor +
-                                ';color:black;padding:1%">' +
-                                'Rating: ' + venue.rating.toString() +
-                                '</span>' + '<br>' +
-                                '<img src="' + venue.bestPhoto.prefix +
-                                'cap300' + venue.bestPhoto.suffix + '">'
-                                ;
-
-        vm.slideContent(formattedData);
-        vm.slideOn(true);
-    }
-
-    function sendError(object, error, exception) {
-        ajax_error = "Web call failed: " + error ;
-        vm.slideContent(ajax_error);
-        vm.slideOn(true);
-    }
-}
 
 
 //===================THE END===================
