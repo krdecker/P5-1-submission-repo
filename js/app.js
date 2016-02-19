@@ -51,27 +51,28 @@ var model = EatsModel;
 
 ///////////////MAP VIEWMODEL///////////////////////////
 
-var map, markers;
+var map;//, markers;
+var eatingSpots = [];
 var infowindow;
 
 
 //get rid of all Google's POI and Transit features on our map
-var cleanSweep = [
-        {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [
-                  { visibility: "off" }
-            ]
-        },
-        {
-            featureType: "transit",
-            elementType: "labels",
-            stylers: [
-                  { visibility: "off"}
-            ]
-        }
-      ];
+// var cleanSweep = [
+//         {
+//             featureType: "poi",
+//             elementType: "labels",
+//             stylers: [
+//                   { visibility: "off" }
+//             ]
+//         },
+//         {
+//             featureType: "transit",
+//             elementType: "labels",
+//             stylers: [
+//                   { visibility: "off"}
+//             ]
+//         }
+//       ];
 
 var RedRoadsNGreenBusStops = [
   {
@@ -121,17 +122,18 @@ function NoMap() {
         "(you may want to check your internet connection) \n");
 }
 
-
+// invoked by map <script> in index.html
 function initMap() {
-    // Create a map object and specify the DOM element for display.
+
     map = new google.maps.Map(document.getElementById('map-div'), mapOptions );
-    markers = [];
+    //markers = [];
     infowindow = new google.maps.InfoWindow({});
 
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
 
-    setMarkers(model.spots, map);
+    //setMarkers(model.spots, map);
+    buildSpots(model.spots);
 
     // stay centred
     google.maps.event.addDomListener(window, 'resize', function() {
@@ -139,31 +141,99 @@ function initMap() {
     });
 }
 
-
-function setMarkers(spots, map) {
+function buildSpots(spots) {
     for (var i in spots) {
-        var spot = spots[i];
+        eatingSpots.push(new Spot(spots[i]));
+        eatingSpots[i].logName();
+    }
+}
+
+var Spot = function(data) {
+  console.log("In Spot constructor for: " + data.name);
+  var that = this;
+  this.name = data.name;
+  this.location = data.location;
+  this.marker = new google.maps.Marker({
+        position: this.location,
+        title: this.name,
+        map: map,
+        opacity: 0.4
+  });
+  //this.content = buildContent(this.marker);
+  this.windowContent = true;
+
+  console.log(this.marker.title);
+  this.clickEvent = google.maps.event.addListener(this.marker, "click", function () {
+        that.doBounce();
+    });
+};
+
+Spot.prototype.logName = function () {
+    console.log("In method logName: " + this.name);
+};
+
+Spot.prototype.doBounce = function () {
+    console.log("In doBounce:  " + this.marker.title);
+    var that = this;
+    // google.maps.event.removeListener(this.clickEvent);
+    // cleanUpScreen();
+    // console.log("In doBounce: with " + this.marker.name);
+    this.marker.setAnimation(google.maps.Animation.BOUNCE);
+    window.setTimeout( function() {
+    //     this.clickEvent = google.maps.event.addListener(this.marker, "click", this.doBounce);
+         that.marker.setAnimation(null);
+    }, 3000);
+    this.openWindow();
+};
+
+
+
+
+
+//deprecated
+// function setMarkers(spots, map) {
+//     for (var i in spots) {
+//         var spot = spots[i];
 
         // if (i==0) offset = {x:100, y:-108};
         // else offset = {x:0, y:-108};
 
        // marker = getMarker(offset, spot.location, spot.name, map);
-        marker = getMarker(spot.location, spot.name, map);
-        markers.push(marker);
-    }
-}
+//         marker = getMarker(spot.location, spot.name, map);
+//         markers.push(marker);
+//     }
+// }
 
 
+
+//  comment from Udacity Grader:
+// Your solution works, but it would be more object oriented to create a constructor function for a location like this:
+
+// var Location = function(data) {
+//   this.name = data.name;
+//   this.location = data.location;
+//   this.marker = new google.maps.Marker(/* ... */);
+// };
+// And populate a locations array instead of a separate markers array:
+
+// locations.push(new Location(spot));
+// You could also attach any function that modifies a single location as a method to this class:
+
+// Location.prototype.stopBounce = function() {
+//   this.marker.setAnimation(null);
+// };
+
+//deprecated
 //function getMarker (offset, location, name, map) {
-function getMarker (location, name, map) {
-    //var markColor = "4f6fcf";
+// function getMarker (location, name, map) {
+//     //var markColor = "4f6fcf";
 
-    var marker = new google.maps.Marker({
-        // anchorPoint: offset,
-        position: location,
-        title: name,
-        map: map,
-        opacity: 0.4
+//     var marker = new google.maps.Marker({
+//         // anchorPoint: offset,
+//         position: location,
+//         title: name,
+//         map: map,
+//         opacity: 0.4
         // icon: {
         //     url: "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + markColor,
         //     size: null, //new google.maps.Size(20, 32),
@@ -171,48 +241,45 @@ function getMarker (location, name, map) {
         //     anchor: null, //new google.maps.Point(10, 32),
         //     scaledSize: new google.maps.Size(60, 108)
         // }
-    });
+//     });
 
-    attachBouncer(marker);
-    return marker;
-}
+//     attachBouncer(marker);
+//     return marker;
+// }
 
-function attachBouncer(marker) {
-    var clickEvent = google.maps.event.addListener(marker, "click", doBounce);
+//deprecated
+// function attachBouncer(marker) {
+//     var clickEvent = google.maps.event.addListener(marker, "click", doBounce);
 
-    function doBounce() {
-        google.maps.event.removeListener(clickEvent);
-        cleanUpScreen();
-        marker.setAnimation(google.maps.Animation.BOUNCE);
+//     function doBounce() {
+//         google.maps.event.removeListener(clickEvent);
+//         cleanUpScreen();
+//         marker.setAnimation(google.maps.Animation.BOUNCE);
 
-        window.setTimeout( function() {
-            clickEvent = google.maps.event.addListener(marker, "click", doBounce);
-            marker.setAnimation(null);
+//         window.setTimeout( function() {
+//             clickEvent = google.maps.event.addListener(marker, "click", doBounce);
+//             marker.setAnimation(null);
 
-        }, 3000);
+//         }, 3000);
 
-        openWindow(marker);
-    }
-}
+//         openWindow(marker);
+//     }
+// }
 
-function cleanUpScreen() {
-    infowindow.close();
-    map.setZoom(model.zoomLevel);
-    map.setCenter(model.center);
-    vm.slideOff();
-}
 
-function openWindow(marker) {
-    var content;
 
-    cleanUpScreen();
-    vm.listCollapse();
+Spot.prototype.openWindow = function () {
+    //var content;
+    console.log("In method openWindow: " + this.marker.title);
+    console.log("Window content: " + this.windowContent);
+    //cleanUpScreen();
+    //vm.listCollapse();
 
-    content = buildContent(marker);
+    //content = buildContent(marker);
 
-    if (content) infowindow.setContent(content);
+    //if (this.content) infowindow.setContent(this.content);
 
-    infowindow.open(marker.get('map'), marker);
+    //infowindow.open(map, this.marker);
 }
 
 function buildContent(marker) {
@@ -249,7 +316,12 @@ function reSetMarkers(spots, map, markers) {
     }
 }
 
-
+function cleanUpScreen() {
+    infowindow.close();
+    map.setZoom(model.zoomLevel);
+    map.setCenter(model.center);
+    vm.slideOff();
+}
 
 
 
