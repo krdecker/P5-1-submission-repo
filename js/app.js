@@ -1,11 +1,5 @@
 
-
-
-
-
 ///////////////////MODEL///////////////////////
-
-
 
 // eats data: an array of places to eat
 // around Commercial-Broadway Station
@@ -47,7 +41,23 @@ var EatsModel = {
     ]
 };
 
-var model = EatsModel;
+var model = {};
+
+function getModel() {
+    if (localStorage.model) {
+        console.log("found model in localStorage: ")
+        return JSON.parse(localStorage.model);
+    } else {
+        return EatsModel;
+    };
+};
+
+
+
+
+console.log(model);
+console.log(Date.now());
+
 
 
 function buildWindowContent(marker) {
@@ -71,28 +81,47 @@ function buildWindowContent(marker) {
 
 // loc formatter function
 // re-format location coordinates
-function getLocationAsLLString(name) {
-    var result = "ll=";
+// function getLocationAsLLString(name) {
+//     var result = "ll=";
 
-    for (var i in model.spots) {
-        var spot = model.spots[i];
-        if (spot.name == spotName) {
-            result += spot.location.lat.toString() + ',' + spot.location.lng.toString();
-        }
+//     for (var i in model.spots) {
+//         var spot = model.spots[i];
+//         if (spot.name == name) {
+//             result += spot.location.lat.toString() + ',' + spot.location.lng.toString();
+//         }
+//     }
+
+//     return result;
+// }
+
+
+//from https://developer.foursquare.com/overview/auth#userless
+//https://api.foursquare.com/v2/venues/search?ll=40.7,-74&client_id=CLIENT_ID&client_secret=CLIENT_SECRET&v=YYYYMMDD
+
+//foursquare.com/v/broadway-station-sushi/4aae9cb7f964a5209b6220e3
+var kr = {
+    foursquare: {
+        Owner: "KR Decker",
+        Client_id: "ZVLKTKSGULFEQ3XMWWI3AL1A2KXYBEKD1LKSURUZDGZY41JX",
+        Client_secret: "TMT203DHWOPR3R4RSM1HE4RMOKEWLGTT0FLMZMUZ1OJHMAK1"
+    },
+    yelp: {
+        Consumer_Key:    "XrxJOUgGNKq9ZuWhBX1LDw",
+        Consumer_Secret: "zr2I76nT8l0O-trkupYE00B9BTA",
+        Token:   "-_F8aOxonR6q5SqvURwwgLIdU-qteS-B",
+        Token_Secret:    "GF7uRcPWCpzlHcRP3DiJWjvcXJE"
     }
-
-    return result;
-}
-
+};
 
 var fourSquareURL = 'https://api.foursquare.com';
 
 
 function buildSlideContent(spot) {
     var formattedData = "";
-    var loc = getLocationAsLLString(spot.name);
+    //var loc = getLocationAsLLString(spot.name);
+    var loc = "ll=" + spot.location.lat.toString() + "," + spot.location.lng.toString();
     var ajax_error;
-    //console.log(loc);
+    console.log(loc);
 
     // get the foursquare ID number of the spot
     $.ajax({
@@ -119,7 +148,7 @@ function buildSlideContent(spot) {
             dataType: 'json',
             data: 'limit=1' +
                     '&' + loc +
-                    '&query=' + spotName +
+                    '&query=' + spot.name +
                     '&client_id='+ kr.foursquare.Client_id +
                     '&client_secret='+ kr.foursquare.Client_secret +
                     '&v=20160130',
@@ -153,8 +182,9 @@ function buildSlideContent(spot) {
                                 '<img src="' + venue.bestPhoto.prefix +
                                 'cap300' + venue.bestPhoto.suffix + '">'
                                 ;
-        console.log(formattedData);
+        //console.log(formattedData);
         spot.slideContent = formattedData;
+        console.log(spot.slideContent);
         //vm.slideContent(formattedData);
         //vm.slideOn(true);
     }
@@ -165,6 +195,8 @@ function buildSlideContent(spot) {
         //vm.slideContent(ajax_error);
         //vm.slideOn(true);
     }
+
+    //return formattedData;
 }
 
 //TODO : build these results into the model and save in Local storage
@@ -246,13 +278,25 @@ function NoMap() {
 function initMap() {
 
     map = new google.maps.Map(document.getElementById('map-div'), mapOptions );
-    //markers = [];
+    model = getModel();
+    console.log("in initMap: " + Date.now());
+
+
+
+    if (!(model.spots[0].slideContent)) {
+        model.spots.forEach( function (spot) {
+            buildSlideContent(spot);
+        });
+    };
+console.log(model);
+    localStorage.model = JSON.stringify(model);
+    vm.spotList(model.spots);
+
     infowindow = new google.maps.InfoWindow({});
 
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
 
-    //setMarkers(model.spots, map);
     buildSpots(model.spots);
 
     // stay centred
@@ -272,6 +316,7 @@ var Spot = function(data) {
   var that = this;
   this.name = data.name;
   this.location = data.location;
+  this.slideContent = data.slideContent;
   this.marker = new google.maps.Marker({
         position: this.location,
         title: this.name,
@@ -279,7 +324,6 @@ var Spot = function(data) {
         opacity: 0.4
   });
   this.windowContent = buildWindowContent(this.marker);
-
   this.clickEvent = google.maps.event.addListener(this.marker, "click", function () {
         that.doOpening();
     });
@@ -338,6 +382,14 @@ Spot.prototype.hideMarker = function () { this.marker.setMap(null); };
 Spot.prototype.showMarker = function () { this.marker.setMap(map); };
 
 
+function getSpot(name) {
+    var result;
+    eatingSpots.forEach( function(spot) {
+       if (spot.name == name) result = spot;
+       //console.log("in getSpot: " + name);
+    });
+    return result;
+}
 
 function resetMarkers(spots) {
     eatingSpots.forEach( function(spot) {
@@ -370,7 +422,11 @@ function cleanUpScreen() {
     vm.slideOff();
 }
 
-
+function dubSlideContents() {
+    for (var i in model.spots) {
+        eatingSpots[i].slideContent = model.spots[i].slideContent;
+    }
+}
 
 /////////////////KO VIEWMODEL///////////////////
 
@@ -383,11 +439,11 @@ var ViewModel = function () {
     // Data
     self.listOn = ko.observable(true);
     self.burgerMenu = ko.observable(false);
-    self.spotList = ko.observableArray(model.spots);
-    console.log(self.spotList());
+    self.spotList = ko.observableArray();
+    console.log("in vm: " + self.spotList());
 
     self.slideOn = ko.observable(false);
-    self.slideContent = ko.observable("");
+    self.slideContent = ko.observable();
 
     self.filterSlot = ko.observable();
     self.isSelected = ko.observable(false);
@@ -397,10 +453,13 @@ var ViewModel = function () {
 
     self.spotPick = function () {
 
-        for (var i in eatingSpots) {
-            var spot = eatingSpots[i];
-            if (this.name == spot.name) spot.doOpening();
-        }
+        // for (var i in eatingSpots) {
+        //     var spot = eatingSpots[i];
+        //     if (this.name == spot.name) spot.doOpening();
+        // }
+
+        var spot = getSpot(this.name);
+        spot.doOpening();
     };
 
     self.setFilterSelected = function() {
@@ -456,7 +515,17 @@ var ViewModel = function () {
 
         // builds content and sets it in slide
         //var ajax_data =
-        buildSlideContent(spotName);
+        //buildSlideContent(spotName);
+        var spot = getSpot(spotName);
+        console.log(spot);
+         //spot.slideContent = formattedData;
+        if (!(spot.slideContent)) {
+            dubSlideContents();
+        };
+        vm.slideContent(spot.slideContent);
+
+        vm.slideOn(true);
+
         //console.log("In openAPI: ");//, ajax_data);
         //self.slideContent(buildSlideContent(spotName));
     //     if self.slideContent(ajax_data);
@@ -542,25 +611,4 @@ function filterList(userText, modelArray) {
 
 
 
-
-
-//from https://developer.foursquare.com/overview/auth#userless
-//https://api.foursquare.com/v2/venues/search?ll=40.7,-74&client_id=CLIENT_ID&client_secret=CLIENT_SECRET&v=YYYYMMDD
-
-//foursquare.com/v/broadway-station-sushi/4aae9cb7f964a5209b6220e3
-
-
-var kr = {
-    foursquare: {
-        Owner: "KR Decker",
-        Client_id: "ZVLKTKSGULFEQ3XMWWI3AL1A2KXYBEKD1LKSURUZDGZY41JX",
-        Client_secret: "TMT203DHWOPR3R4RSM1HE4RMOKEWLGTT0FLMZMUZ1OJHMAK1"
-    },
-    yelp: {
-        Consumer_Key:    "XrxJOUgGNKq9ZuWhBX1LDw",
-        Consumer_Secret: "zr2I76nT8l0O-trkupYE00B9BTA",
-        Token:   "-_F8aOxonR6q5SqvURwwgLIdU-qteS-B",
-        Token_Secret:    "GF7uRcPWCpzlHcRP3DiJWjvcXJE"
-    }
-};
 
