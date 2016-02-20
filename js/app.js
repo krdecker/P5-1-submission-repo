@@ -57,7 +57,7 @@ function buildWindowContent(marker) {
     var picture = '<img class="bgimg" src="' + streetviewUrl + '">';
     //console.log("In buildContent: " + marker.position.toString());
     //var css = '"height:100%;width:100%;font-size:4em;color:blue;background-color:orange;padding:5px"';
-    var css = '"height:100%;width:100%"';
+    var css = '"height:100%;width:80%"';
     var content = '<div onclick="itchwindow()" style=' +
                     css + '>' + picture + '<br><span style="color:darkgreen">' +
                     marker.title + '</span>' +
@@ -69,13 +69,28 @@ function buildWindowContent(marker) {
 //==========================================================
 // 3rd party API stuff
 
+// loc formatter function
+// re-format location coordinates
+function getLocationAsLLString(name) {
+    var result = "ll=";
+
+    for (var i in model.spots) {
+        var spot = model.spots[i];
+        if (spot.name == spotName) {
+            result += spot.location.lat.toString() + ',' + spot.location.lng.toString();
+        }
+    }
+
+    return result;
+}
+
 
 var fourSquareURL = 'https://api.foursquare.com';
 
 
-function buildSlideContent(spotName) {
+function buildSlideContent(spot) {
     var formattedData = "";
-    var loc = getLocationAsLLString(spotName, EatsModel);
+    var loc = getLocationAsLLString(spot.name);
     var ajax_error;
     //console.log(loc);
 
@@ -84,7 +99,7 @@ function buildSlideContent(spotName) {
             url: fourSquareURL + '/v2/venues/search',
             dataType: 'json',
             data: 'limit=1' +
-                    '&' + loc + '&query=' + spotName +
+                    '&' + loc + '&query=' + spot.name +
                     '&client_id='+ kr.foursquare.Client_id +
                     '&client_secret='+ kr.foursquare.Client_secret +
                     '&v=20160130',
@@ -138,15 +153,17 @@ function buildSlideContent(spotName) {
                                 '<img src="' + venue.bestPhoto.prefix +
                                 'cap300' + venue.bestPhoto.suffix + '">'
                                 ;
-
-        vm.slideContent(formattedData);
-        vm.slideOn(true);
+        console.log(formattedData);
+        spot.slideContent = formattedData;
+        //vm.slideContent(formattedData);
+        //vm.slideOn(true);
     }
 
     function sendError(object, error, exception) {
         ajax_error = "Web call failed: " + error ;
-        vm.slideContent(ajax_error);
-        vm.slideOn(true);
+        console.log(ajax_error);
+        //vm.slideContent(ajax_error);
+        //vm.slideOn(true);
     }
 }
 
@@ -247,13 +264,11 @@ function initMap() {
 function buildSpots(spots) {
     for (var i in spots) {
         eatingSpots.push(new Spot(spots[i]));
-        //eatingSpots[i].logName();
     }
 }
 
 // constructor
 var Spot = function(data) {
-  //console.log("In Spot constructor for: " + data.name);
   var that = this;
   this.name = data.name;
   this.location = data.location;
@@ -263,50 +278,23 @@ var Spot = function(data) {
         map: map,
         opacity: 0.4
   });
-
   this.windowContent = buildWindowContent(this.marker);
 
-  //console.log(this.marker.title);
   this.clickEvent = google.maps.event.addListener(this.marker, "click", function () {
-        that.doBounce();
+        that.doOpening();
     });
 };
 
-Spot.prototype.logName = function () {
-    console.log("In method logName: " + this.name);
-};
-
-Spot.prototype.doBounce = function () {
-    console.log("In doBounce:  " + this.marker.title);
+Spot.prototype.doOpening = function () {
     var that = this;
-    // google.maps.event.removeListener(this.clickEvent);
-    // cleanUpScreen();
-    // console.log("In doBounce: with " + this.marker.name);
+
+    cleanUpScreen();
     this.marker.setAnimation(google.maps.Animation.BOUNCE);
     window.setTimeout( function() {
-    //     this.clickEvent = google.maps.event.addListener(this.marker, "click", this.doBounce);
-         that.marker.setAnimation(null);
-    }, 3000);
-    this.openWindow();
+        that.openWindow();
+        that.marker.setAnimation(null);
+    }, 1000);
 };
-
-
-
-
-
-//deprecated
-// function setMarkers(spots, map) {
-//     for (var i in spots) {
-//         var spot = spots[i];
-
-        // if (i==0) offset = {x:100, y:-108};
-        // else offset = {x:0, y:-108};
-
-       // marker = getMarker(offset, spot.location, spot.name, map);
-//         marker = getMarker(spot.location, spot.name, map);
-//         markers.push(marker);
-//     }
-// }
 
 
 
@@ -327,57 +315,12 @@ Spot.prototype.doBounce = function () {
 //   this.marker.setAnimation(null);
 // };
 
-//deprecated
-//function getMarker (offset, location, name, map) {
-// function getMarker (location, name, map) {
-//     //var markColor = "4f6fcf";
-
-//     var marker = new google.maps.Marker({
-//         // anchorPoint: offset,
-//         position: location,
-//         title: name,
-//         map: map,
-//         opacity: 0.4
-        // icon: {
-        //     url: "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + markColor,
-        //     size: null, //new google.maps.Size(20, 32),
-        //     origin: null, //new google.maps.Point(0, 0),
-        //     anchor: null, //new google.maps.Point(10, 32),
-        //     scaledSize: new google.maps.Size(60, 108)
-        // }
-//     });
-
-//     attachBouncer(marker);
-//     return marker;
-// }
-
-//deprecated
-// function attachBouncer(marker) {
-//     var clickEvent = google.maps.event.addListener(marker, "click", doBounce);
-
-//     function doBounce() {
-//         google.maps.event.removeListener(clickEvent);
-//         cleanUpScreen();
-//         marker.setAnimation(google.maps.Animation.BOUNCE);
-
-//         window.setTimeout( function() {
-//             clickEvent = google.maps.event.addListener(marker, "click", doBounce);
-//             marker.setAnimation(null);
-
-//         }, 3000);
-
-//         openWindow(marker);
-//     }
-// }
-
-
-
 Spot.prototype.openWindow = function () {
     //var content;
-    console.log("In method openWindow: " + this.marker.title);
-    console.log("Window content: " + this.windowContent);
+    //console.log("In method openWindow: " + this.marker.title);
+    //console.log("Window content: " + this.windowContent);
     //cleanUpScreen();
-    //vm.listCollapse();
+    vm.listCollapse();
 
     infowindow.setContent(this.windowContent);
     infowindow.open(map, this.marker);
@@ -391,17 +334,34 @@ function itchwindow() {
 
 
 // interface map/markers viewmodel to ko text filtration system
-function reSetMarkers(spots, map, markers) {
-    var names = [];
+Spot.prototype.hideMarker = function () { this.marker.setMap(null); };
+Spot.prototype.showMarker = function () { this.marker.setMap(map); };
 
-    for (var i in spots) names.push(spots[i].name);
 
-    for (var j in markers) {
-        marker = markers[j];
-        if (names.indexOf(marker.title) > -1) marker.setMap(map);
-        else marker.setMap(null);
+
+function resetMarkers(spots) {
+    eatingSpots.forEach( function(spot) {
+        spot.hideMarker();
+    });
+
+    for (var i in spots) {
+        console.log("in function resetMarkers: " + spots[i].name);
+        eatingSpots.forEach( function(spot) {
+            if (spots[i].name == spot.name) spot.showMarker();
+        });
     }
+
 }
+//     // var names = [];
+
+//     // for (var i in spots) names.push(spots[i].name);
+
+//     // for (var j in markers) {
+//     //     marker = markers[j];
+//     if (show) marker.setMap(map);
+//     else marker.setMap(null);
+//     // }
+// };
 
 function cleanUpScreen() {
     infowindow.close();
@@ -424,6 +384,7 @@ var ViewModel = function () {
     self.listOn = ko.observable(true);
     self.burgerMenu = ko.observable(false);
     self.spotList = ko.observableArray(model.spots);
+    console.log(self.spotList());
 
     self.slideOn = ko.observable(false);
     self.slideContent = ko.observable("");
@@ -435,11 +396,10 @@ var ViewModel = function () {
     // Behaviours
 
     self.spotPick = function () {
-        console.log(this.name);
-        for (var i in markers) {
-            var marker = markers[i];
-            if (marker.title == this.name)
-                google.maps.event.trigger(marker, 'click');
+
+        for (var i in eatingSpots) {
+            var spot = eatingSpots[i];
+            if (this.name == spot.name) spot.doOpening();
         }
     };
 
@@ -453,8 +413,9 @@ var ViewModel = function () {
 
         self.listExpand();
 
-        self.spotList(filterList(data, model.spots));
-        reSetMarkers(self.spotList(), map, markers);
+        self.spotList(filterList(data, eatingSpots));
+
+        resetMarkers(self.spotList());
     });
 
     self.onEnter = function (data, event) {
@@ -465,11 +426,7 @@ var ViewModel = function () {
             }
             else {
                 if (self.spotList().length === 1) {
-                    for (var i in markers) {
-                        var marker = markers[i];
-                        if (marker.title == self.spotList()[0].name)
-                            google.maps.event.trigger(marker, 'click');
-                    }
+                    self.spotList()[0].doOpening();
                 }
             }
         }
@@ -534,19 +491,7 @@ function filterList(userText, modelArray) {
      return result;
 }
 
-// re-format location coordinates
-function getLocationAsLLString(spotName, model) {
-    var result = "ll=";
 
-    for (var i in model.spots) {
-        var spot = model.spots[i];
-        if (spot.name == spotName) {
-            result += spot.location.lat.toString() + ',' + spot.location.lng.toString();
-        }
-    }
-
-    return result;
-}
 
 
 
