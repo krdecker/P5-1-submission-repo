@@ -1,56 +1,51 @@
 
-/** {
+/*
+* {
     border-style: solid;
     border-color: red;
-}*/
-
+}
+*/
 
 html {
 height: 100%;
 width: 100%;
 }
-
 body {
     height: 100%;
     width: 100%;
     /*display: block;*/
     background-color: #c28242;
-
 }
 @media screen and (max-width: 549px) {
     body {
         font-size: 9pt;
     }
     #burger {
-        width: 6%;
-        padding: 2%;
+        width: 5%;
+        padding: 2.5%;
         position: absolute;
     }
 }
-
 @media screen and (min-width: 550px) {
     body {
         font-size: 10pt;
     }
     #burger {
-        width: 5%;
+        width: 3.5%;
         padding: 1.5%;
         position: absolute;
     }
 }
-
 @media screen and (min-width: 850px) {
     body {
         font-size: 12pt;
     }
     #burger {
-        width: 4%;
-        padding: 1%;
+        width: 3%;
+        padding: 1.5%;
         position: absolute;
     }
-
 }
-
 #map-box {
     height: 100%;
     width: 100%;
