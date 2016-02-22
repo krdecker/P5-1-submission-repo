@@ -1,11 +1,4 @@
 
-/*
-* {
-    border-style: solid;
-    border-color: red;
-}
-*/
-
 html {
 height: 100%;
 width: 100%;
@@ -13,8 +6,6 @@ width: 100%;
 body {
     height: 100%;
     width: 100%;
-    /*display: block;*/
-    background-color: #c28242;
 }
 @media screen and (max-width: 549px) {
     body {
@@ -49,6 +40,9 @@ body {
 #map-box {
     height: 100%;
     width: 100%;
+    border: 0px;
+    border-top: 0px;
+    border-bottom: 0px;
 }
 #api-slide {
     position: absolute;
@@ -82,7 +76,7 @@ body {
     padding: 3px;
 }
 li.spot {
-    height: 5%; /*80px;*/
+    height: 5%;
     font-size: 1.5em;
     color: #ff1f00;
     padding: 2px;
