@@ -83,7 +83,6 @@ function buildSlideContent(spot) {
                     '&client_secret='+ kr.foursquare.Client_secret +
                     '&v=20160130',
             async: true,
-            //success: ,
             error: sendError
     }).success(function(response){
           getVenueInfo(response);
@@ -101,7 +100,6 @@ function buildSlideContent(spot) {
                     '&client_secret='+ kr.foursquare.Client_secret +
                     '&v=20160130',
             async: true,
-            //success: ,
             error: sendError
     }).success(function(response){
           formatShowData(response);
@@ -126,13 +124,14 @@ function buildSlideContent(spot) {
                         'cap300' + venue.bestPhoto.suffix + '">'
                         ;
         spot.slideContent = formattedData;
-        console.log(spot.slideContent);
     }
     function sendError(object, error, exception) {
-        ajax_error = "Web call failed: " + error ;
-        spot.slideContent = ajax_error;
+        var ajax_error = "Sorry. 3rd party info unavailable.";
+        spot.slideContent = ajax_error + exception;
     }
 }
+
+
 
 /////////////////////////////////////MAP VIEWMODEL////////////////////////////////////
 
@@ -182,22 +181,19 @@ var mapOptions = {
         styles: RedRoadsNGreenBusStops
     };
 
-function NoMap() {
-    alert("Google Map is unavailable just now.\n" +
-        "(you may want to check your internet connection) \n");
-}
-
 // invoked by map <script> in index.html
 function init() {
     map = new google.maps.Map(document.getElementById('map-div'), mapOptions );
     model = getModel(); // load data object either from localStorage or file
     // then build the slide content with ajax api calls, if necessary
-    if (!(model.spots[0].slideContent)) {
-        model.spots.forEach( function (spot) {
-            buildSlideContent(spot);
-        });
+    if ( (model.spots[0].slideContent == undefined) ||
+         (model.spots[0].slideContent.slice(0,5) == "Sorry")) {
+            model.spots.forEach( function (spot) {
+                spot.slideContent = "";
+                buildSlideContent(spot);
+            });
     };
-    localStorage.model = JSON.stringify(model);
+
     viewModel.spotList(model.spots);
     infowindow = new google.maps.InfoWindow({});
     map.setZoom(model.zoomLevel);
@@ -209,6 +205,9 @@ function init() {
     google.maps.event.addDomListener(window, 'resize', function() {
         map.setCenter(model.center);
     });
+    window.setTimeout( function() {
+        localStorage.model = JSON.stringify(model);
+    }, 3000);
 }
 
 // constructor
@@ -328,11 +327,9 @@ ko.applyBindings(viewModel);
 function filterList(userText, modelArray) {
      var result=[],
          re = new RegExp(userText, ['i']);
-
      modelArray.forEach( function(element, index, array) {
         if (re.test(element.name)) result.push(element);
      });
-
      return result;
 }
 function getSpot(name) {

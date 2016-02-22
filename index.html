@@ -37,8 +37,11 @@
 
     <script src="js/lib/knockout-latest.js"></script>
     <script src="js/lib/jquery.min.js"></script>
-
-
+    <script>function NoMap() {
+        alert("Google Map is unavailable just now.\n" +
+            "(you may want to check your internet connection) \n");
+        }
+    </script>
     <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBL3i9VGUZEVT-ELGUb2vAG0q27WdoQT94&callback=init" async defer
         onerror="NoMap()">
