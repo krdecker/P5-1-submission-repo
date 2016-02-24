@@ -1,13 +1,18 @@
-fend-P5-1-inter-map
+##fend-P5-1-inter-map
 ===================
 
-Interactive Neighbourhood Map
+#Interactive Neighbourhood Map
 
-This is Project 5-1 of the Udacity Front-End Developer Nano-Degree.
-It grows out of course-work from the JavaScript Design Patterns course
-& Introduction to Ajax course.
+
+
+This is Project 5-1 of the **Udacity Front-End Developer Nano-Degree.**
+It grows out of course-work from the _JavaScript Design Patterns_ course
+& _Introduction to Ajax_ course.
+
+
 
 to see the working model:
+
 http://krdecker.github.io/P5-1-submission-repo/
 
 The map shows a list of spots to eat in and around the Commercial-Broadway Station in East Vancouver, British Columbia. Each spot on the list is represented by a marker on the map. One may click on a name in the list to see the marker bob to indicate the location and see a small street view. If one clicks on the street view, another slide will open with detailed information about the spot, from FourSquare, and their colour-coded rating.

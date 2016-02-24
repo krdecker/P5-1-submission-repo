@@ -67,7 +67,7 @@ function buildWindowContent(marker) {
 
 //==========================================================
 // 3rd party API stuff
-var fourSquareURL = 'https://api.foursquare.com';
+var fourSquareURL = 'https://api.foursquare,com';
 
 function buildSlideContent(spot) {
     var formattedData = "";
