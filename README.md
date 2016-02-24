@@ -35,7 +35,7 @@ Then in the terminal in the project directory:
 
 ##Licence
 
-
+Code is free to use under **GNU General Public License.**  See file `Licence.txt` for more info.
 
 ##Contact
 
