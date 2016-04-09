@@ -97,8 +97,12 @@ li.spot:hover {
     color: SeaGreen;
 }
 
-.hilight {
-    color: #ffff00;
+li.hilight {
+    color: SeaGreen;
+}
+
+li.under {
+    text-decoration: underline
 }
 
 #selector {

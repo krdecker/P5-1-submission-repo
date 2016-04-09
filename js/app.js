@@ -93,9 +93,7 @@ function buildSlideContent(spot) {
             async: true,
             success: getVenueInfo,
             error: sendError
-    });/*.success(function(response){
-          getVenueInfo(response);
-        });*/
+    });
 
     // give the response on specific venue to another call for
     // more detailed information
@@ -291,20 +289,44 @@ var Spot = function(data) {
         that.doOpening();
     });
   this.overEvent = google.maps.event.addListener(this.marker, "mouseover", function () {
-        //that.hiLightListItem();
-        console.log("we could hi-light the " + that.name + " list item now");
+        that.hiLightListItem();
+
   });
   this.outEvent = google.maps.event.addListener(this.marker, "mouseout", function () {
-        //that.hiLightListItem();
-        console.log("we could lo-light the " + that.name + " list item now");
+        that.loLightListItem();
+
   });
 };
 
 Spot.prototype.hiLightListItem = function () {
     var that = this;
     cleanUpScreen();
+    console.log("we could hi-light the " + that.name + " list item now");
+    $("li:contains(" + that.name + ")").toggleClass( "hilight under" );//.toggleClass("hilight");
+
 
 };
+
+Spot.prototype.loLightListItem = function () {
+    var that = this;
+    //cleanUpScreen();
+    console.log("we could lo-light the " + that.name + " list item now");
+    $("li:contains(" + that.name + ")").toggleClass("hilight under");
+
+};
+
+Spot.prototype.doBounce = function ()  {
+    var that = this;
+    cleanUpScreen();
+    this.marker.setAnimation(google.maps.Animation.BOUNCE);
+    // window.setTimeout( function() {
+    //     that.marker.setAnimation(null);
+    // }, 3000);
+};
+
+Spot.prototype.stopBounce = function () {
+    this.marker.setAnimation(null);
+}
 
 Spot.prototype.doOpening = function () {
     var that = this;
@@ -345,7 +367,14 @@ var ViewModel = function () {
 
     self.bounceMarker = function() {
         console.log("Bouncey, bouncey " + this.name);
+        var spot = getSpot(this.name);
+        spot.doBounce();
     };
+
+    self.unbounceMarker = function () {
+        var spot = getSpot(this.name);
+        spot.stopBounce();
+    }
 
     self.spotPick = function() {
         var spot = getSpot(this.name);
