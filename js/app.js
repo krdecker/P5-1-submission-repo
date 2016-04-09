@@ -1,4 +1,4 @@
-
+'use strict';
 ////////////////////////////////////MODEL/////////////////////////////////////
 
 // eats data: an array of places to eat
@@ -49,12 +49,16 @@ function getModel() {
         return JSON.parse(localStorage.model);
     } else {
         return EatsModel;
-    };
-};
+    }
+}
+
 
 function buildWindowContent(marker) {
     var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=200x150&location=' +
-                            marker.position.toString() + '';
+                            marker.position.toString().slice(1,-1) ;// + '&key=' + kr.streetview.key;
+    // marker.position.toString() method changed to include parentheses, hence the slice
+    // key not required
+
     var picture = '<img class="bgimg" src="' + streetviewUrl + '">';
     var css = '"height:100%;width:80%"';
     var content = '<div onclick="itchwindow()" style=' +
@@ -67,12 +71,16 @@ function buildWindowContent(marker) {
 
 //==========================================================
 // 3rd party API stuff
-var fourSquareURL = 'https://api.foursquare,com';
+var fourSquareURL = 'https://api.foursquare.com';
 
+// get content for info slides from 3rd party sources
+// based on info from model
+// then add to model and to view objects
 function buildSlideContent(spot) {
     var formattedData = "";
     var loc = "ll=" + spot.location.lat.toString() + "," + spot.location.lng.toString();
     var ajax_error;
+
     // get the foursquare ID number of the spot
     $.ajax({
             url: fourSquareURL + '/v2/venues/search',
@@ -83,11 +91,16 @@ function buildSlideContent(spot) {
                     '&client_secret='+ kr.foursquare.Client_secret +
                     '&v=20160130',
             async: true,
+            success: getVenueInfo,
             error: sendError
-    }).success(function(response){
+    });/*.success(function(response){
           getVenueInfo(response);
-        });
-    function getVenueInfo(data) {
+        });*/
+
+    // give the response on specific venue to another call for
+    // more detailed information
+    function getVenueInfo(data, status) {
+        console.log("In getVenueInfo: status = " + status);
         var venue = data.response.venues[0];
         //https://api.foursquare.com/v2/venues/VENUE_ID
         $.ajax({ // to get the detailed foursquare of the 'complete venue' based on ID
@@ -100,11 +113,13 @@ function buildSlideContent(spot) {
                     '&client_secret='+ kr.foursquare.Client_secret +
                     '&v=20160130',
             async: true,
+            success: formatShowData,
             error: sendError
-    }).success(function(response){
-          formatShowData(response);
-        });
+        });/*.success(function(response){
+                formatShowData(response);
+            });*/
     }
+
     function formatShowData(data){
         var venue = data.response.venue;
         formattedData = 'FourSquare info: ' +
@@ -123,20 +138,70 @@ function buildSlideContent(spot) {
                         '<img src="' + venue.bestPhoto.prefix +
                         'cap300' + venue.bestPhoto.suffix + '">'
                         ;
-        spot.slideContent = formattedData;
+        //spot.slideContent = formattedData;
+        updateSlideContent(spot, formattedData);
     }
     function sendError(object, error, exception) {
         var ajax_error = "Sorry. 3rd party info unavailable.";
-        spot.slideContent = ajax_error + exception;
+        updateSlideContent(spot, ajax_error);
     }
 }
 
+function updateSlideContent(spot, dataString) {
+    // update the model
+    spot.slideContent = dataString;
+    // update the view
+    var vmSpot = getSpot(spot.name);
+    if (vmSpot) {
+        console.log("in updateSlideContent: viewSpot ");
+        vmSpot.slideContent = dataString;
+    }
+}
 
+// MarkN's implementation of
+/**
+ * Generates a random number and returns it as a string for OAuthentication
+ * @return {string}
+ */
+// function nonce_generate() {
+//   return (Math.floor(Math.random() * 1e12).toString());
+// }
+
+// var yelp_url = YELP_BASE_URL + 'business/' + self.selected_place().Yelp.business_id;
+
+//     var parameters = {
+//       oauth_consumer_key: YELP_KEY,
+//       oauth_token: YELP_TOKEN,
+//       oauth_nonce: nonce_generate(),
+//       oauth_timestamp: Math.floor(Date.now()/1000),
+//       oauth_signature_method: 'HMAC-SHA1',
+//       oauth_version : '1.0',
+//       callback: 'cb'              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
+//     };
+
+//     var encodedSignature = oauthSignature.generate('GET',yelp_url, parameters, YELP_KEY_SECRET, YELP_TOKEN_SECRET);
+//     parameters.oauth_signature = encodedSignature;
+
+//     var settings = {
+//       url: yelp_url,
+//       data: parameters,
+//       cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
+//       dataType: 'jsonp',
+//       success: function(results) {
+//         // Do stuff with results
+//       },
+//       error: function() {
+//         // Do stuff on fail
+//       }
+//     };
+
+//     // Send AJAX query via jQuery library.
+//     $.ajax(settings);
 
 /////////////////////////////////////MAP VIEWMODEL////////////////////////////////////
 
 var map;
-var eatingSpots = [];
+var vmSpots = [];
 var infowindow;
 
 var RedRoadsNGreenBusStops = [
@@ -186,20 +251,19 @@ function init() {
     map = new google.maps.Map(document.getElementById('map-div'), mapOptions );
     model = getModel(); // load data object either from localStorage or file
     // then build the slide content with ajax api calls, if necessary
-    if ( (model.spots[0].slideContent == undefined) ||
+    if ( (model.spots[0].slideContent === undefined) ||
          (model.spots[0].slideContent.slice(0,5) == "Sorry")) {
             model.spots.forEach( function (spot) {
-                spot.slideContent = "";
                 buildSlideContent(spot);
             });
-    };
+    }
 
     viewModel.spotList(model.spots);
     infowindow = new google.maps.InfoWindow({});
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
     model.spots.forEach( function(spot) {
-        eatingSpots.push(new Spot(spot));
+        vmSpots.push(new Spot(spot));
     });
     // stay centred
     google.maps.event.addDomListener(window, 'resize', function() {
@@ -226,6 +290,20 @@ var Spot = function(data) {
   this.clickEvent = google.maps.event.addListener(this.marker, "click", function () {
         that.doOpening();
     });
+  this.overEvent = google.maps.event.addListener(this.marker, "mouseover", function () {
+        //that.hiLightListItem();
+        console.log("we could hi-light the list item now");
+  });
+  this.outEvent = google.maps.event.addListener(this.marker, "mouseout", function () {
+        //that.hiLightListItem();
+        console.log("we could lo-light the list item now");
+  });
+};
+
+Spot.prototype.hiLightListItem = function () {
+    var that = this;
+    cleanUpScreen();
+
 };
 
 Spot.prototype.doOpening = function () {
@@ -242,7 +320,7 @@ Spot.prototype.openWindow = function () {
     viewModel.listCollapse();
     infowindow.setContent(this.windowContent);
     infowindow.open(map, this.marker);
-}
+};
 
 Spot.prototype.hideMarker = function () { this.marker.setMap(null); };
 Spot.prototype.showMarker = function () { this.marker.setMap(map); };
@@ -275,7 +353,7 @@ var ViewModel = function () {
     };
     self.filterSlot.subscribe(function(data) {
         self.listExpand();
-        self.spotList(filterList(data, eatingSpots));
+        self.spotList(filterList(data, vmSpots));
         resetMarkers(self.spotList());
     });
     self.onEnter = function (data, event) {
@@ -297,8 +375,12 @@ var ViewModel = function () {
         return true; // necessary to reflect the text in the slot
     };
     self.listCollapse = function () {
-        self.listOn(false);
-        self.burgerMenu(true);
+        //disable for big screen; enable for small
+        var mediaquery = window.matchMedia( "(max-width: 549px)" );
+        if (mediaquery.matches) {
+            self.listOn(false);
+            self.burgerMenu(true);
+        }
     };
     self.listExpand = function () {
         cleanUpScreen();
@@ -309,7 +391,7 @@ var ViewModel = function () {
         var spot = getSpot(spotName);
         if (!(spot.slideContent)) {
             dubSlideContents();
-        };
+        }
         viewModel.slideContent(spot.slideContent);
         viewModel.slideOn(true);
     };
@@ -332,34 +414,42 @@ function filterList(userText, modelArray) {
      });
      return result;
 }
+
 function getSpot(name) {
     var result;
-    eatingSpots.forEach( function(spot) {
+    vmSpots.forEach( function(spot) {
        if (spot.name == name) result = spot;
     });
     return result;
 }
+
+// edit the set of displayed markers based on the filtered spotList
 function resetMarkers(spots) {
-    eatingSpots.forEach( function(spot) {
+    vmSpots.forEach(function(spot) {
         spot.hideMarker();
     });
-    for (var i in spots) {
-        getSpot(spots[i].name).showMarker();
-    }
+    spots.forEach(function(item) {
+        getSpot(item.name).showMarker();
+    });
 }
+
+// called in the click event listener of infoWindow
 function itchwindow() {
     viewModel.openAPIslide(infowindow.anchor.title);
 }
+
+// get rid of old over-lays
 function cleanUpScreen() {
     infowindow.close();
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
     viewModel.slideOff();
 }
+
 function dubSlideContents() {
     if (model.spots[0].slideContent) {
         for (var i in model.spots) {
-            eatingSpots[i].slideContent = model.spots[i].slideContent;
+            vmSpots[i].slideContent = model.spots[i].slideContent;
             localStorage.model = JSON.stringify(model);
         }
     }
@@ -461,6 +551,9 @@ var kr = {
         Consumer_Secret: "zr2I76nT8l0O-trkupYE00B9BTA",
         Token:   "-_F8aOxonR6q5SqvURwwgLIdU-qteS-B",
         Token_Secret:    "GF7uRcPWCpzlHcRP3DiJWjvcXJE"
+    },
+    streetview: {
+        key: "AIzaSyAP631z6WqMoptoaGherhJVBGyN1uPHPt4"
     }
 };
 
