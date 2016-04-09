@@ -370,16 +370,19 @@ var ViewModel = function () {
         var spot = getSpot(this.name);
         spot.doOpening();
     };
+
     self.setFilterSelected = function() {
         this.isSelected(true);
         cleanUpScreen();
         self.listExpand();
     };
+
     self.filterSlot.subscribe(function(data) {
         self.listExpand();
         self.spotList(filterList(data, vmSpots));
         resetMarkers(self.spotList());
     });
+
     self.onEnter = function (data, event) {
         if (event.keyCode === 13) {
             if (infowindow.anchor) {
@@ -398,6 +401,7 @@ var ViewModel = function () {
         }
         return true; // necessary to reflect the text in the slot
     };
+
     self.listCollapse = function () {
         //disable for big screen; enable for small
         var mediaquery = window.matchMedia( "(max-width: 549px)" );
@@ -468,6 +472,8 @@ function cleanUpScreen() {
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
     viewModel.slideOff();
+    // TODO: reset the hilight and under classes on the spot-list
+    $("ul.spot-list").removeClass("hilight under");
 }
 
 function dubSlideContents() {
