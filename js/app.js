@@ -13,7 +13,7 @@ var EatsModel = {
     spots: [
         {
             name: "Uncle Fatih's Pizza",
-            location: {lat: 49.262487, lng: -123.070000} //was .262517 .070177
+            location: {lat: 49.262437, lng: -123.070750}
         },
         {
             name: "Buddha's Orient Express",
@@ -301,27 +301,18 @@ var Spot = function(data) {
 Spot.prototype.hiLightListItem = function () {
     var that = this;
     cleanUpScreen();
-    console.log("we could hi-light the " + that.name + " list item now");
-    $("li:contains(" + that.name + ")").toggleClass( "hilight under" );//.toggleClass("hilight");
-
-
+    $("li:contains(" + that.name + ")").toggleClass( "hilight under" );
 };
 
 Spot.prototype.loLightListItem = function () {
     var that = this;
-    //cleanUpScreen();
-    console.log("we could lo-light the " + that.name + " list item now");
     $("li:contains(" + that.name + ")").toggleClass("hilight under");
-
 };
 
 Spot.prototype.doBounce = function ()  {
     var that = this;
     cleanUpScreen();
     this.marker.setAnimation(google.maps.Animation.BOUNCE);
-    // window.setTimeout( function() {
-    //     that.marker.setAnimation(null);
-    // }, 3000);
 };
 
 Spot.prototype.stopBounce = function () {
@@ -366,7 +357,6 @@ var ViewModel = function () {
     // Behaviours
 
     self.bounceMarker = function() {
-        console.log("Bouncey, bouncey " + this.name);
         var spot = getSpot(this.name);
         spot.doBounce();
     };
