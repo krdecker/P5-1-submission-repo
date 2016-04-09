@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    <title>Station</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Station Tout</title>
+    <meta name=viewport content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <link href="css/styles.css" rel="stylesheet">
 </head>
@@ -16,19 +16,22 @@
         <img id="burgerpic" src="img/burger.png">
     </div>
     <div id="listing" class="over-lay" data-bind="visible: listOn">
-        <ul id="spot-list" data-bind="foreach: spotList">
+        <ul id="spot-list" class= "spot-list" data-bind="foreach: spotList">
             <li class="spot" data-bind="text: name,
-                                        click: $parent.spotPick"></li>
+                                        click: $parent.spotPick,
+                                        event: { mouseover: $parent.bounceMarker, mouseout: $parent.unbounceMarker }"
+                                       ></li>
         </ul>
     </div>
 
     <div id="map-box">
         <div id="map-div" class="under-lay"></div>
         <div id="selector" class="over-lay" data-bind="">
-            <input id="filter-slot" placeholder=" type here..." data-bind="click: setFilterSelected,
+            <input id="filter-slot" placeholder=" type here..."
+             data-bind="click: setFilterSelected,
                         hasFocus: isSelected,
                         textInput: filterSlot,
-                        event: {keypress: onEnter}">
+                        event: {keypress: onEnter}"/>
 
             <button id="filter-button" data-bind="click: setFilterSelected">FILTER</button>
         </div>
@@ -41,7 +44,9 @@
             "(you may want to check your internet connection) \n");
         }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBL3i9VGUZEVT-ELGUb2vAG0q27WdoQT94&callback=init" async defer="defer" onerror="NoMap()">
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBL3i9VGUZEVT-ELGUb2vAG0q27WdoQT94&callback=init" async defer
+        onerror="NoMap()">
     </script>
     <script src="js/app.js"></script>
 </body>
