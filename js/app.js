@@ -9,7 +9,7 @@
 // basic data, loaded if more detailed model not found in localStorage
 var EatsModel = {
     zoomLevel: 18,
-    center: {lat: 49.262387, lng: -123.069868},//49.262387, -123.069768
+    center: {lat: 49.262387, lng: -123.069950},//49.262387, -123.069768
     spots: [
         {
             name: "Uncle Fatih's Pizza",
@@ -233,7 +233,7 @@ var RedRoadsNGreenBusStops = [
 ];
 
 var mapOptions = {
-        center: {lat: 49.262387, lng: -123.069768},//49.262387, -123.069768
+        center: {lat: 49.262387, lng: -123.069868},//49.262387, -123.069768
         // Commercial Broadway Station 49°15′45″N, 123°04′08″W
         zoom: 16,
         zoomControl: true,
