@@ -16,9 +16,10 @@
         <img id="burgerpic" src="img/burger.png">
     </div>
     <div id="listing" class="over-lay" data-bind="visible: listOn">
-        <ul id="spot-list" data-bind="foreach: spotList">
+        <ul id="spot-list" class= "spot-list" data-bind="foreach: spotList">
             <li class="spot" data-bind="text: name,
-                                        click: $parent.spotPick"
+                                        click: $parent.spotPick,
+                                        event: { mouseover: $parent.bounceMarker }"
                                        ></li>
         </ul>
     </div>

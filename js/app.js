@@ -342,7 +342,12 @@ var ViewModel = function () {
     self.isSelected = ko.observable(false);
 
     // Behaviours
-    self.spotPick = function () {
+
+    self.bounceMarker = function() {
+        console.log("Bouncey, bouncey " + this.name);
+    };
+
+    self.spotPick = function() {
         var spot = getSpot(this.name);
         spot.doOpening();
     };
