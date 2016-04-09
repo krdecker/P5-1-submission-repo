@@ -473,7 +473,7 @@ function cleanUpScreen() {
     map.setCenter(model.center);
     viewModel.slideOff();
     // TODO: reset the hilight and under classes on the spot-list
-    $("ul.spot-list").removeClass("hilight under");
+    $("ul.spot-list li").removeClass("hilight under");
 }
 
 function dubSlideContents() {
