@@ -292,11 +292,11 @@ var Spot = function(data) {
     });
   this.overEvent = google.maps.event.addListener(this.marker, "mouseover", function () {
         //that.hiLightListItem();
-        console.log("we could hi-light the list item now");
+        console.log("we could hi-light the " + that.name + " list item now");
   });
   this.outEvent = google.maps.event.addListener(this.marker, "mouseout", function () {
         //that.hiLightListItem();
-        console.log("we could lo-light the list item now");
+        console.log("we could lo-light the " + that.name + " list item now");
   });
 };
 

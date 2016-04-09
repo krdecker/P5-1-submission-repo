@@ -93,6 +93,14 @@ li.spot {
     padding: 2px;
 }
 
+li.spot:hover {
+    color: SeaGreen;
+}
+
+.hilight {
+    color: #ffff00;
+}
+
 #selector {
     height: 8%;
     padding-left: 5%;
