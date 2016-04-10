@@ -9,7 +9,7 @@
 // basic data, loaded if more detailed model not found in localStorage
 var EatsModel = {
     zoomLevel: 18,
-    center: {lat: 49.262387, lng: -123.069950},//49.262387, -123.069768
+    center: {lat: 49.262387, lng: -123.069956},//49.262387, -123.069768
     spots: [
         {
             name: "Uncle Fatih's Pizza",
