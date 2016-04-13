@@ -9,13 +9,13 @@
 </head>
 
 <body>
-    <div id="api-slide" data-bind="visible: slideOn, click: slideOff">
+    <div id="api-slide" class="api-slide" data-bind="visible: slideOn, click: slideOff">
         <span data-bind="html: slideContent"></span>
     </div>
-    <div id="burger" class="over-lay" data-bind="visible: burgerMenu, click: listExpand">
+    <div id="burger" class="burger over-lay" data-bind="visible: burgerMenu, click: listExpand">
         <img id="burgerpic" src="img/burger.png">
     </div>
-    <div id="listing" class="over-lay" data-bind="visible: listOn">
+    <div id="listing" class="listing over-lay" data-bind="visible: listOn">
         <ul id="spot-list" class= "spot-list" data-bind="foreach: spotList">
             <li class="spot" data-bind="text: name,
                                         click: $parent.spotPick,
@@ -24,16 +24,16 @@
         </ul>
     </div>
 
-    <div id="map-box">
-        <div id="map-div" class="under-lay"></div>
-        <div id="selector" class="over-lay" data-bind="">
-            <input id="filter-slot" placeholder=" type here..."
+    <div id="map-box" class="map-box">
+        <div id="map-div" class="map-div under-lay"></div>
+        <div id="selector" class="selector over-lay" data-bind="">
+            <input id="filter-slot" class="filter-slot" placeholder=" type here..."
              data-bind="click: setFilterSelected,
                         hasFocus: isSelected,
                         textInput: filterSlot,
                         event: {keypress: onEnter}"/>
 
-            <button id="filter-button" data-bind="click: setFilterSelected">FILTER</button>
+            <button id="filter-button" class="filter-button" data-bind="click: setFilterSelected">FILTER</button>
         </div>
     </div>
 
