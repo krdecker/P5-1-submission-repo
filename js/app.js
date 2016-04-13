@@ -13,7 +13,7 @@ var EatsModel = {
     spots: [
         {
             name: "Uncle Fatih's Pizza",
-            location: {lat: 49.262437, lng: -123.070750}
+            location: {lat: 49.262437, lng: -123.070215}
         },
         {
             name: "Buddha's Orient Express",
@@ -25,7 +25,7 @@ var EatsModel = {
         },
         {
             name: "Starbucks Coffee",
-            location: {lat: 49.261874, lng: -123.070176}
+            location: {lat: 49.261874, lng: -123.070076}
         },
         {
             name: "Blenz Coffee",
@@ -54,7 +54,7 @@ function getModel() {
 
 
 function buildWindowContent(marker) {
-    var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=200x150&location=' +
+    var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=300x250&location=' +
                             marker.position.toString().slice(1,-1) ;// + '&key=' + kr.streetview.key;
     // marker.position.toString() method changed to include parentheses, hence the slice
     // key not required
@@ -113,9 +113,7 @@ function buildSlideContent(spot) {
             async: true,
             success: formatShowData,
             error: sendError
-        });/*.success(function(response){
-                formatShowData(response);
-            });*/
+        });
     }
 
     function formatShowData(data){
@@ -140,6 +138,8 @@ function buildSlideContent(spot) {
         updateSlideContent(spot, formattedData);
     }
     function sendError(object, error, exception) {
+        // if api not working (and local storage is cleared)
+        // then content of each slide is set to error msg
         var ajax_error = "Sorry. 3rd party info unavailable.";
         updateSlideContent(spot, ajax_error);
     }
@@ -260,6 +260,7 @@ function init() {
     infowindow = new google.maps.InfoWindow({});
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
+    //build array of eating spot objects based on the model
     model.spots.forEach( function(spot) {
         vmSpots.push(new Spot(spot));
     });
@@ -410,11 +411,13 @@ var ViewModel = function () {
             self.burgerMenu(true);
         }
     };
+
     self.listExpand = function () {
         cleanUpScreen();
         self.burgerMenu(false);
         self.listOn(true);
     };
+
     self.openAPIslide = function (spotName) {
         var spot = getSpot(spotName);
         if (!(spot.slideContent)) {
@@ -423,6 +426,7 @@ var ViewModel = function () {
         viewModel.slideContent(spot.slideContent);
         viewModel.slideOn(true);
     };
+
     self.slideOff = function () {
         this.slideOn(false);
     };
@@ -445,10 +449,17 @@ function filterList(userText, modelArray) {
 
 function getSpot(name) {
     var result;
-    vmSpots.forEach( function(spot) {
-       if (spot.name == name) result = spot;
-    });
-    return result;
+
+    for (var i = 0; i < vmSpots.length; i++) {
+      if ( vmSpots[i].name == name ) return vmSpots[i];
+    }
+
+    // vmSpots.forEach( function(spot) {
+    //    if (spot.name == name) result = spot;
+    // });
+    // return result;
+
+
 }
 
 // edit the set of displayed markers based on the filtered spotList
@@ -472,16 +483,20 @@ function cleanUpScreen() {
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
     viewModel.slideOff();
-    // TODO: reset the hilight and under classes on the spot-list
+    // reset the hilight and under classes on the spot-list
     $("ul.spot-list li").removeClass("hilight under");
 }
 
 function dubSlideContents() {
     if (model.spots[0].slideContent) {
-        for (var i in model.spots) {
-            vmSpots[i].slideContent = model.spots[i].slideContent;
-            localStorage.model = JSON.stringify(model);
-        }
+        model.spots.forEach(function(spot, index) {
+            vmSpots[index].slideContent = spot.slideContent;
+        });
+        localStorage.model = JSON.stringify(model);
+        // for (var i in model.spots) {
+        //     vmSpots[i].slideContent = model.spots[i].slideContent;
+        //     localStorage.model = JSON.stringify(model);
+        // }
     }
 }
 
@@ -586,4 +601,3 @@ var kr = {
         key: "AIzaSyAP631z6WqMoptoaGherhJVBGyN1uPHPt4"
     }
 };
-
