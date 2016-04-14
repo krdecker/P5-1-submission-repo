@@ -307,9 +307,7 @@ var Spot = function(data) {
   this.name = data.name;
   this.location = data.location;
   this.category = data.category;
-  console.log(this.name + " : " + this.category);
   this.slideContent = data.slideContent;
-  console.log(icons[this.category].icon);
   this.marker = new google.maps.Marker({
         position: this.location,
         title: this.name,
@@ -318,16 +316,15 @@ var Spot = function(data) {
         opacity: 0.4
   });
   this.windowContent = buildWindowContent(this.marker);
+
   this.clickEvent = google.maps.event.addListener(this.marker, "click", function () {
         that.doOpening();
     });
   this.overEvent = google.maps.event.addListener(this.marker, "mouseover", function () {
         that.hiLightListItem();
-
   });
   this.outEvent = google.maps.event.addListener(this.marker, "mouseout", function () {
         that.loLightListItem();
-
   });
 };
 
@@ -370,7 +367,6 @@ Spot.prototype.openWindow = function () {
     this.closeEvent = google.maps.event.addListener(infowindow, "closeclick", function () {
           cleanUpScreen();
           viewModel.listExpand();
-          console.log("Got closeclicked in " + that.name);
           google.maps.event.removeListener(that.closeEvent);
     });
 };
@@ -476,8 +472,9 @@ ko.applyBindings(viewModel);
 
 //---------------------------------HELPER FUNCTIONS------------------------------
 //
-//test array against a regular expression
+
 function filterList(userText, modelArray) {
+//test array against a regular expression
      var result=[],
          re = new RegExp(userText, ['i']);
      modelArray.forEach( function(element, index, array) {
@@ -487,22 +484,15 @@ function filterList(userText, modelArray) {
 }
 
 function getSpot(name) {
-    var result;
-
+// returns the view-model object with the given name
     for (var i = 0; i < vmSpots.length; i++) {
       if ( vmSpots[i].name == name ) return vmSpots[i];
     }
-
-    // vmSpots.forEach( function(spot) {
-    //    if (spot.name == name) result = spot;
-    // });
-    // return result;
-
-
 }
 
-// edit the set of displayed markers based on the filtered spotList
+
 function resetMarkers(spots) {
+// edit the set of displayed markers based on the filtered spotList
     vmSpots.forEach(function(spot) {
         spot.hideMarker();
     });
@@ -511,13 +501,15 @@ function resetMarkers(spots) {
     });
 }
 
-// called in the click event listener of infoWindow
+
 function itchwindow() {
+// called in the click event listener of infoWindow
     viewModel.openAPIslide(infowindow.anchor.title);
 }
 
-// get rid of old over-lays
+
 function cleanUpScreen() {
+// get rid of old over-lays and lingering effects
     infowindow.close();
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
