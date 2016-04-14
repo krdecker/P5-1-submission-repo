@@ -369,6 +369,7 @@ Spot.prototype.openWindow = function () {
     infowindow.open(map, this.marker);
     this.closeEvent = google.maps.event.addListener(infowindow, "closeclick", function () {
           cleanUpScreen();
+          viewModel.listExpand();
           console.log("Got closeclicked in " + that.name);
           google.maps.event.removeListener(that.closeEvent);
     });
