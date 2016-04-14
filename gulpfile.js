@@ -7,7 +7,7 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     concatenate = require('gulp-concat'),
     sourcemap = require('gulp-sourcemaps'),
-    imagemin = require('gulp-imagemin'),
+    imgmin = require('gulp-imagemin'),
     cssmin = require('gulp-cssnano'),
     htmlmin = require('gulp-htmlmin');
 
@@ -41,6 +41,13 @@ gulp.task('styles', function(){
         .pipe(reload({stream:true}))
 });
 
+gulp.task('pictures', function(){
+    gulp.src('./img/*.png')
+        .pipe(imgmin())
+        .pipe(gulp.dest('./build/img/'))
+        .pipe(reload({stream:true}))
+});
+
 gulp.task('serve', function(){
     browserSync.init({
         server: {
@@ -52,7 +59,4 @@ gulp.task('serve', function(){
     gulp.watch('./css/*.css', ['styles']);
 });
 
-gulp.task('default', ['content','scripts','styles','serve']);
-
-
-
+gulp.task('default', ['content','scripts','styles','pictures','serve']);

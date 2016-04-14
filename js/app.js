@@ -13,31 +13,38 @@ var EatsModel = {
     spots: [
         {
             name: "Uncle Fatih's Pizza",
-            location: {lat: 49.262437, lng: -123.070215}
+            location: {lat: 49.262437, lng: -123.070215},
+            category: "pizza"
         },
         {
             name: "Buddha's Orient Express",
-            location: {lat: 49.262719, lng: -123.069289}
+            location: {lat: 49.262719, lng: -123.069289},
+            category: "asian"
         },
         {
             name: "Booster Juice",
-            location: {lat: 49.262641, lng: -123.069438}
+            location: {lat: 49.262641, lng: -123.069438},
+            category: "juice"
         },
         {
             name: "Starbucks Coffee",
-            location: {lat: 49.261874, lng: -123.070076}
+            location: {lat: 49.261874, lng: -123.070076},
+            category: "coffee"
         },
         {
             name: "Blenz Coffee",
-            location: {lat: 49.262534, lng: -123.069529}
+            location: {lat: 49.262534, lng: -123.069529},
+            category: "coffee"
         },
         {
             name: "Megabite Pizza",
-            location: {lat: 49.262779, lng: -123.069317}
+            location: {lat: 49.262779, lng: -123.069317},
+            category: "pizza"
         },
         {
             name: "Broadway Station Sushi",
-            location: {lat: 49.262084, lng: -123.070962}
+            location: {lat: 49.262084, lng: -123.070962},
+            category: "asian"
         }
     ]
 };
@@ -244,6 +251,24 @@ var mapOptions = {
         styles: RedRoadsNGreenBusStops
     };
 
+var icons = {
+  asian: {
+    icon: 'img/asian.png'
+  },
+  coffee: {
+    icon: 'img/coffee.png'
+  },
+  food: {
+    icon: 'img/food.png'
+  },
+  juice: {
+    icon: 'img/juice.png'
+  },
+  pizza: {
+    icon: 'img/pizza.png'
+  }
+};
+
 // invoked by map <script> in index.html
 function init() {
     map = new google.maps.Map(document.getElementById('map-div'), mapOptions );
@@ -260,14 +285,17 @@ function init() {
     infowindow = new google.maps.InfoWindow({});
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
+
     //build array of eating spot objects based on the model
     model.spots.forEach( function(spot) {
         vmSpots.push(new Spot(spot));
     });
+
     // stay centred
     google.maps.event.addDomListener(window, 'resize', function() {
         map.setCenter(model.center);
     });
+    // when things settle down, store a copy of the model locally
     window.setTimeout( function() {
         localStorage.model = JSON.stringify(model);
     }, 3000);
@@ -278,10 +306,14 @@ var Spot = function(data) {
   var that = this;
   this.name = data.name;
   this.location = data.location;
+  this.category = data.category;
+  console.log(this.name + " : " + this.category);
   this.slideContent = data.slideContent;
+  console.log(icons[this.category].icon);
   this.marker = new google.maps.Marker({
         position: this.location,
         title: this.name,
+        icon: icons[this.category].icon,
         map: map,
         opacity: 0.4
   });
@@ -336,7 +368,7 @@ Spot.prototype.openWindow = function () {
     infowindow.setContent(this.windowContent);
     infowindow.open(map, this.marker);
     this.closeEvent = google.maps.event.addListener(infowindow, "closeclick", function () {
-          cleanUpScreen();;
+          cleanUpScreen();
           console.log("Got closeclicked in " + that.name);
           google.maps.event.removeListener(that.closeEvent);
     });
