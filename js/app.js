@@ -318,7 +318,7 @@ Spot.prototype.doBounce = function ()  {
 
 Spot.prototype.stopBounce = function () {
     this.marker.setAnimation(null);
-}
+};
 
 Spot.prototype.doOpening = function () {
     var that = this;
@@ -331,9 +331,15 @@ Spot.prototype.doOpening = function () {
 };
 
 Spot.prototype.openWindow = function () {
+    var that = this;
     viewModel.listCollapse();
     infowindow.setContent(this.windowContent);
     infowindow.open(map, this.marker);
+    this.closeEvent = google.maps.event.addListener(infowindow, "closeclick", function () {
+          cleanUpScreen();;
+          console.log("Got closeclicked in " + that.name);
+          google.maps.event.removeListener(that.closeEvent);
+    });
 };
 
 Spot.prototype.hideMarker = function () { this.marker.setMap(null); };
@@ -365,7 +371,7 @@ var ViewModel = function () {
     self.unbounceMarker = function () {
         var spot = getSpot(this.name);
         spot.stopBounce();
-    }
+    };
 
     self.spotPick = function() {
         var spot = getSpot(this.name);
@@ -491,12 +497,10 @@ function dubSlideContents() {
     if (model.spots[0].slideContent) {
         model.spots.forEach(function(spot, index) {
             vmSpots[index].slideContent = spot.slideContent;
+            // in the event that api call fails, we want to re-copy the
+            // model locally, to display error message
+            localStorage.model = JSON.stringify(model);
         });
-        localStorage.model = JSON.stringify(model);
-        // for (var i in model.spots) {
-        //     vmSpots[i].slideContent = model.spots[i].slideContent;
-        //     localStorage.model = JSON.stringify(model);
-        // }
     }
 }
 
