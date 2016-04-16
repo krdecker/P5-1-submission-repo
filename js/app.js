@@ -282,6 +282,8 @@ function init() {
     }
 
     viewModel.spotList(model.spots);
+    //if (narrowScreen()) viewModel.filterOn(false);
+    viewModel.filterOn(!narrowScreen());
     infowindow = new google.maps.InfoWindow({});
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
@@ -294,6 +296,8 @@ function init() {
     // stay centred
     google.maps.event.addDomListener(window, 'resize', function() {
         map.setCenter(model.center);
+        //narrowScreen() ? viewModel.filterOn(false) : viewModel.filterOn(true);
+        viewModel.filterOn(!narrowScreen());
     });
     // when things settle down, store a copy of the model locally
     window.setTimeout( function() {
@@ -387,6 +391,7 @@ var ViewModel = function () {
     self.spotList = ko.observableArray();
     self.slideOn = ko.observable(false);
     self.slideContent = ko.observable();
+    self.filterOn = ko.observable(true);
     self.filterSlot = ko.observable();
     self.isSelected = ko.observable(false);
 
@@ -440,10 +445,15 @@ var ViewModel = function () {
 
     self.listCollapse = function () {
         //disable for big screen; enable for small
-        var mediaquery = window.matchMedia( "(max-width: 549px)" );
-        if (mediaquery.matches) {
-            self.listOn(false);
-            self.burgerMenu(true);
+        // var mediaquery = window.matchMedia( "(max-width: 549px)" );
+        // if (mediaquery.matches) {
+        //     self.listOn(false);
+        //     self.burgerMenu(true);
+        // }
+
+        if (narrowScreen()) {
+          self.listOn(false);
+          self.burgerMenu(true);
         }
     };
 
@@ -490,7 +500,6 @@ function getSpot(name) {
     }
 }
 
-
 function resetMarkers(spots) {
 // edit the set of displayed markers based on the filtered spotList
     vmSpots.forEach(function(spot) {
@@ -501,12 +510,10 @@ function resetMarkers(spots) {
     });
 }
 
-
 function itchwindow() {
 // called in the click event listener of infoWindow
     viewModel.openAPIslide(infowindow.anchor.title);
 }
-
 
 function cleanUpScreen() {
 // get rid of old over-lays and lingering effects
@@ -529,7 +536,10 @@ function dubSlideContents() {
     }
 }
 
-
+function narrowScreen() {
+  var mediaquery = window.matchMedia( "(max-width: 549px)" );
+  if (mediaquery.matches) return true;
+}
 
 
 

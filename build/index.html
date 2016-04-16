@@ -26,7 +26,7 @@
 
     <div id="map-box" class="map-box">
         <div id="map-div" class="map-div under-lay"></div>
-        <div id="selector" class="selector over-lay" data-bind="">
+        <div id="selector" class="selector over-lay" data-bind="visible: filterOn">
             <input id="filter-slot" class="filter-slot" placeholder=" type here..."
              data-bind="click: setFilterSelected,
                         hasFocus: isSelected,
