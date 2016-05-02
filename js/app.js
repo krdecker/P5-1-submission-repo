@@ -1,3 +1,10 @@
+
+//(function () {
+//   'use strict';
+   // this function is strict...
+
+
+
 'use strict';
 ////////////////////////////////////MODEL/////////////////////////////////////
 
@@ -282,8 +289,8 @@ function init() {
     }
 
     viewModel.spotList(model.spots);
-    //if (narrowScreen()) viewModel.filterOn(false);
     viewModel.filterOn(!narrowScreen());
+
     infowindow = new google.maps.InfoWindow({});
     map.setZoom(model.zoomLevel);
     map.setCenter(model.center);
@@ -296,9 +303,9 @@ function init() {
     // stay centred
     google.maps.event.addDomListener(window, 'resize', function() {
         map.setCenter(model.center);
-        //narrowScreen() ? viewModel.filterOn(false) : viewModel.filterOn(true);
         viewModel.filterOn(!narrowScreen());
     });
+
     // when things settle down, store a copy of the model locally
     window.setTimeout( function() {
         localStorage.model = JSON.stringify(model);
@@ -640,3 +647,6 @@ var kr = {
         key: "AIzaSyAP631z6WqMoptoaGherhJVBGyN1uPHPt4"
     }
 };
+
+
+//}());
